@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import TournamentController from '@/actions/App/Http/Controllers/TournamentController';
-import TeamCreationModal from '@/components/TeamCreationModal.vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
+import TeamCreationModal from '@/components/TeamCreationModal.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,15 +12,9 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Form, Head, Link } from '@inertiajs/vue3';
 import { Plus, Search, X } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 
-type Team = {
-    id: number;
-    name: string;
-    createdAt: string | null;
-    updatedAt: string | null;
-    logoUrl: string | null;
-};
+type Team = App.Data.TeamData;
 
 type Props = {
     teams: Team[];
@@ -46,13 +40,13 @@ const filteredTeams = computed(() => {
     const query = searchQuery.value.toLowerCase().trim();
     if (!query) {
         return props.teams.filter(
-            (team) => !selectedTeams.value.some((st) => st.id === team.id)
+            (team) => !selectedTeams.value.some((st) => st.id === team.id),
         );
     }
     return props.teams.filter(
         (team) =>
             !selectedTeams.value.some((st) => st.id === team.id) &&
-            team.name.toLowerCase().includes(query)
+            team.name.toLowerCase().includes(query),
     );
 });
 
@@ -86,7 +80,9 @@ const updateStrength = (teamId: number, strength: string | number) => {
     <Head title="Create Tournament" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+        <div
+            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
+        >
             <Heading
                 variant="small"
                 title="Create Tournament"
@@ -95,12 +91,16 @@ const updateStrength = (teamId: number, strength: string | number) => {
 
             <Form
                 v-bind="TournamentController.store.form()"
-                class="space-y-6 max-w-4xl"
+                class="max-w-4xl space-y-6"
                 v-slot="{ errors, processing, recentlySuccessful }"
-                @submit="(e) => {
-                    const formData = new FormData(e.target as HTMLFormElement);
-                    formData.append('teams', JSON.stringify(selectedTeams));
-                }"
+                @submit="
+                    (e) => {
+                        const formData = new FormData(
+                            e.target as HTMLFormElement,
+                        );
+                        formData.append('teams', JSON.stringify(selectedTeams));
+                    }
+                "
             >
                 <div class="grid gap-2">
                     <Label for="name">Tournament Name</Label>
@@ -115,7 +115,11 @@ const updateStrength = (teamId: number, strength: string | number) => {
                     <InputError class="mt-2" :message="errors.name" />
                 </div>
 
-                <input type="hidden" name="teams" :value="JSON.stringify(selectedTeams)" />
+                <input
+                    type="hidden"
+                    name="teams"
+                    :value="JSON.stringify(selectedTeams)"
+                />
 
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
@@ -134,7 +138,9 @@ const updateStrength = (teamId: number, strength: string | number) => {
                     <div class="space-y-3">
                         <Label for="team-search">Search Teams</Label>
                         <div class="relative">
-                            <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Search
+                                class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                            />
                             <Input
                                 id="team-search"
                                 v-model="searchQuery"
@@ -166,7 +172,9 @@ const updateStrength = (teamId: number, strength: string | number) => {
                                         {{ team.name.charAt(0) }}
                                     </AvatarFallback>
                                 </Avatar>
-                                <p class="truncate text-sm font-medium">{{ team.name }}</p>
+                                <p class="truncate text-sm font-medium">
+                                    {{ team.name }}
+                                </p>
                                 <Button
                                     type="button"
                                     variant="ghost"
@@ -194,7 +202,8 @@ const updateStrength = (teamId: number, strength: string | number) => {
                         class="rounded-lg border border-dashed p-6 text-center"
                     >
                         <p class="text-sm text-muted-foreground">
-                            No teams available. Create your first team to get started.
+                            No teams available. Create your first team to get
+                            started.
                         </p>
                     </div>
 
@@ -202,7 +211,9 @@ const updateStrength = (teamId: number, strength: string | number) => {
                         v-if="selectedTeams.length > 0"
                         class="space-y-3 rounded-lg border-2 border-primary/20 bg-muted/30 p-4"
                     >
-                        <Label class="text-base font-semibold">Team Strength Points</Label>
+                        <Label class="text-base font-semibold"
+                            >Team Strength Points</Label
+                        >
                         <div class="space-y-2">
                             <div
                                 v-for="selectedTeam in selectedTeams"
@@ -216,7 +227,11 @@ const updateStrength = (teamId: number, strength: string | number) => {
                                         :alt="getTeam(selectedTeam.id)?.name"
                                     />
                                     <AvatarFallback>
-                                        {{ getTeam(selectedTeam.id)?.name?.charAt(0) }}
+                                        {{
+                                            getTeam(
+                                                selectedTeam.id,
+                                            )?.name?.charAt(0)
+                                        }}
                                     </AvatarFallback>
                                 </Avatar>
                                 <span class="flex-1 font-medium">
@@ -233,7 +248,13 @@ const updateStrength = (teamId: number, strength: string | number) => {
                                         :id="`strength-${selectedTeam.id}`"
                                         type="text"
                                         :model-value="selectedTeam.strength"
-                                        @update:model-value="(value) => updateStrength(selectedTeam.id, value)"
+                                        @update:model-value="
+                                            (value) =>
+                                                updateStrength(
+                                                    selectedTeam.id,
+                                                    value,
+                                                )
+                                        "
                                         class="w-24"
                                     />
                                 </div>
@@ -278,16 +299,18 @@ const updateStrength = (teamId: number, strength: string | number) => {
             <TeamCreationModal
                 :open="showModal"
                 @update:open="showModal = $event"
-                @team-created="(team) => {
-                    props.teams.push({
-                        id: team.id,
-                        name: team.name,
-                        createdAt: null,
-                        updatedAt: null,
-                        logoUrl: team.logoUrl || null,
-                    });
-                    addTeam(team.id);
-                }"
+                @team-created="
+                    (team) => {
+                        props.teams.push({
+                            id: team.id,
+                            name: team.name,
+                            createdAt: null,
+                            updatedAt: null,
+                            logoUrl: team.logoUrl || null,
+                        });
+                        addTeam(team.id);
+                    }
+                "
             />
         </div>
     </AppLayout>

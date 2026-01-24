@@ -9,12 +9,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Form, Head, Link } from '@inertiajs/vue3';
 
-type Team = {
-    id: number;
-    name: string;
-    createdAt: string | null;
-    updatedAt: string | null;
-};
+type Team = App.Data.TeamData;
 
 type Props = {
     team: Team;
@@ -37,7 +32,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     <Head title="Edit Team" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+        <div
+            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
+        >
             <Heading
                 variant="small"
                 title="Edit Team"
@@ -46,7 +43,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
             <Form
                 v-bind="TeamController.update.form(props.team.id)"
-                class="space-y-6 max-w-2xl"
+                class="max-w-2xl space-y-6"
                 v-slot="{ errors, processing, recentlySuccessful }"
             >
                 <div class="grid gap-2">

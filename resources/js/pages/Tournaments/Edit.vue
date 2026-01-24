@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import TournamentController from '@/actions/App/Http/Controllers/TournamentController';
-import TeamCreationModal from '@/components/TeamCreationModal.vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
+import TeamCreationModal from '@/components/TeamCreationModal.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,29 +10,10 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Form, Head, Link } from '@inertiajs/vue3';
 import { Plus } from 'lucide-vue-next';
-import { ref, computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
-type Team = {
-    id: number;
-    name: string;
-    createdAt: string | null;
-    updatedAt: string | null;
-    logoUrl: string | null;
-};
-
-type TeamTournament = {
-    id: number;
-    name: string;
-    strength: number;
-};
-
-type Tournament = {
-    id: number;
-    name: string;
-    status: string;
-    userId: number;
-    teams: TeamTournament[] | null;
-};
+type Team = App.Data.TeamData;
+type Tournament = App.Data.TournamentData;
 
 type Props = {
     tournament: Tournament;
@@ -67,7 +48,7 @@ const isEditable = computed(() => props.tournament.status === 'created');
 
 const availableTeams = computed(() => {
     return props.teams.filter(
-        (team) => !selectedTeams.value.some((st) => st.id === team.id)
+        (team) => !selectedTeams.value.some((st) => st.id === team.id),
     );
 });
 
@@ -115,7 +96,9 @@ const handleTeamCreated = (team: { id: number; name: string }) => {
     <Head title="Edit Tournament" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+        <div
+            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
+        >
             <Heading
                 variant="small"
                 title="Edit Tournament"
@@ -124,12 +107,16 @@ const handleTeamCreated = (team: { id: number; name: string }) => {
 
             <Form
                 v-bind="TournamentController.update.form(props.tournament.id)"
-                class="space-y-6 max-w-4xl"
+                class="max-w-4xl space-y-6"
                 v-slot="{ errors, processing, recentlySuccessful }"
-                @submit="(e) => {
-                    const formData = new FormData(e.target as HTMLFormElement);
-                    formData.append('teams', JSON.stringify(selectedTeams));
-                }"
+                @submit="
+                    (e) => {
+                        const formData = new FormData(
+                            e.target as HTMLFormElement,
+                        );
+                        formData.append('teams', JSON.stringify(selectedTeams));
+                    }
+                "
             >
                 <div class="grid gap-2">
                     <Label for="name">Tournament Name</Label>
@@ -145,15 +132,26 @@ const handleTeamCreated = (team: { id: number; name: string }) => {
                     <InputError class="mt-2" :message="errors.name" />
                 </div>
 
-                <input type="hidden" name="teams" :value="JSON.stringify(selectedTeams)" />
+                <input
+                    type="hidden"
+                    name="teams"
+                    :value="JSON.stringify(selectedTeams)"
+                />
 
-                <div v-if="!isEditable" class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/20">
+                <div
+                    v-if="!isEditable"
+                    class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/20"
+                >
                     <p class="text-sm text-yellow-800 dark:text-yellow-200">
-                        This tournament cannot be updated. Only tournaments with "created" status can be modified.
+                        This tournament cannot be updated. Only tournaments with
+                        "created" status can be modified.
                     </p>
                 </div>
 
-                <div class="space-y-4" :class="{ 'opacity-50 pointer-events-none': !isEditable }">
+                <div
+                    class="space-y-4"
+                    :class="{ 'pointer-events-none opacity-50': !isEditable }"
+                >
                     <div class="flex items-center justify-between">
                         <Label>Teams</Label>
                         <Button
@@ -170,14 +168,19 @@ const handleTeamCreated = (team: { id: number; name: string }) => {
                         <Label for="team-select">Select Team</Label>
                         <select
                             id="team-select"
-                            class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                            @change="(e) => {
-                                const teamId = parseInt((e.target as HTMLSelectElement).value);
-                                if (teamId) {
-                                    addTeam(teamId);
-                                    (e.target as HTMLSelectElement).value = '';
+                            class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                            @change="
+                                (e) => {
+                                    const teamId = parseInt(
+                                        (e.target as HTMLSelectElement).value,
+                                    );
+                                    if (teamId) {
+                                        addTeam(teamId);
+                                        (e.target as HTMLSelectElement).value =
+                                            '';
+                                    }
                                 }
-                            }"
+                            "
                         >
                             <option value="">Select a team...</option>
                             <option
@@ -192,26 +195,36 @@ const handleTeamCreated = (team: { id: number; name: string }) => {
 
                     <div
                         v-if="selectedTeams.length > 0"
-                        class="rounded-lg border border-sidebar-border/70 dark:border-sidebar-border overflow-hidden"
+                        class="overflow-hidden rounded-lg border border-sidebar-border/70 dark:border-sidebar-border"
                     >
                         <table class="w-full">
                             <thead class="bg-muted/50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                                    >
                                         Logo
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                                    >
                                         Team
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                                    >
                                         Strength
                                     </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                                    >
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-sidebar-border/70 dark:divide-sidebar-border">
+                            <tbody
+                                class="divide-y divide-sidebar-border/70 dark:divide-sidebar-border"
+                            >
                                 <tr
                                     v-for="selectedTeam in selectedTeams"
                                     :key="selectedTeam.id"
@@ -228,21 +241,35 @@ const handleTeamCreated = (team: { id: number; name: string }) => {
                                             v-else
                                             class="flex h-10 w-10 items-center justify-center rounded bg-muted text-xs font-medium"
                                         >
-                                            {{ getTeamName(selectedTeam.id).charAt(0) }}
+                                            {{
+                                                getTeamName(
+                                                    selectedTeam.id,
+                                                ).charAt(0)
+                                            }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <td
+                                        class="px-6 py-4 text-sm font-medium whitespace-nowrap"
+                                    >
                                         {{ getTeamName(selectedTeam.id) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <Input
                                             type="text"
                                             :model-value="selectedTeam.strength"
-                                            @update:model-value="(value) => updateStrength(selectedTeam.id, value)"
+                                            @update:model-value="
+                                                (value) =>
+                                                    updateStrength(
+                                                        selectedTeam.id,
+                                                        value,
+                                                    )
+                                            "
                                             class="w-24"
                                         />
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                                    <td
+                                        class="px-6 py-4 text-right whitespace-nowrap"
+                                    >
                                         <Button
                                             type="button"
                                             variant="ghost"
@@ -260,7 +287,9 @@ const handleTeamCreated = (team: { id: number; name: string }) => {
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <Button :disabled="processing || !isEditable">Update Tournament</Button>
+                    <Button :disabled="processing || !isEditable"
+                        >Update Tournament</Button
+                    >
                     <Link :href="TournamentController.index.url()">
                         <Button variant="outline">Cancel</Button>
                     </Link>

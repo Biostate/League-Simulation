@@ -24,7 +24,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     <Head title="Create Team" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+        <div
+            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
+        >
             <Heading
                 variant="small"
                 title="Create Team"
@@ -33,7 +35,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
             <Form
                 v-bind="TeamController.store.form()"
-                class="space-y-6 max-w-2xl"
+                class="max-w-2xl space-y-6"
                 v-slot="{ errors, processing, recentlySuccessful }"
             >
                 <div class="grid gap-2">

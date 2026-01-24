@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import TournamentController from '@/actions/App/Http/Controllers/TournamentController';
 import Pagination from '@/components/Pagination.vue';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -17,21 +17,8 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { Edit, Plus, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 
-type TournamentStatus = 'created' | 'in_progress' | 'completed';
-
-type TeamTournament = {
-    id: number;
-    name: string;
-    strength: number;
-};
-
-type Tournament = {
-    id: number;
-    name: string;
-    status: TournamentStatus;
-    userId: number;
-    teams: TeamTournament[] | null;
-};
+type Tournament = App.Data.TournamentData;
+type TournamentStatus = App.Enums.TournamentStatus;
 
 type Props = {
     tournaments: Tournament[];
@@ -67,12 +54,14 @@ const closeDeleteDialog = () => {
 
 const confirmDelete = () => {
     if (tournamentToDelete.value) {
-        router.delete(TournamentController.destroy.url(tournamentToDelete.value));
+        router.delete(
+            TournamentController.destroy.url(tournamentToDelete.value),
+        );
         closeDeleteDialog();
     }
 };
 
-const getStatusBadgeVariant = (status: TournamentStatus) => {
+const getStatusBadgeVariant = (status: App.Enums.TournamentStatus) => {
     switch (status) {
         case 'created':
             return 'secondary';
@@ -89,7 +78,10 @@ const getTournamentName = () => {
     if (!tournamentToDelete.value) {
         return '';
     }
-    return props.tournaments.find((t) => t.id === tournamentToDelete.value)?.name || '';
+    return (
+        props.tournaments.find((t) => t.id === tournamentToDelete.value)
+            ?.name || ''
+    );
 };
 </script>
 
@@ -97,7 +89,9 @@ const getTournamentName = () => {
     <Head title="Tournaments" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+        <div
+            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
+        >
             <div class="flex items-center justify-between">
                 <h1 class="text-2xl font-bold">Tournaments</h1>
                 <Link :href="TournamentController.create.url()">
@@ -108,40 +102,74 @@ const getTournamentName = () => {
                 </Link>
             </div>
 
-            <div class="rounded-lg border border-sidebar-border/70 dark:border-sidebar-border overflow-hidden">
+            <div
+                class="overflow-hidden rounded-lg border border-sidebar-border/70 dark:border-sidebar-border"
+            >
                 <table class="w-full">
                     <thead class="bg-muted/50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                            >
                                 Name
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                            >
                                 Status
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                            >
                                 Teams
                             </th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th
+                                class="px-6 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                            >
                                 Actions
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-sidebar-border/70 dark:divide-sidebar-border">
-                        <tr v-for="tournament in props.tournaments" :key="tournament.id" class="hover:bg-muted/50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <tbody
+                        class="divide-y divide-sidebar-border/70 dark:divide-sidebar-border"
+                    >
+                        <tr
+                            v-for="tournament in props.tournaments"
+                            :key="tournament.id"
+                            class="hover:bg-muted/50"
+                        >
+                            <td
+                                class="px-6 py-4 text-sm font-medium whitespace-nowrap"
+                            >
                                 {{ tournament.name }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <Badge :variant="getStatusBadgeVariant(tournament.status)">
+                                <Badge
+                                    :variant="
+                                        getStatusBadgeVariant(tournament.status)
+                                    "
+                                >
                                     {{ tournament.status.replace('_', ' ') }}
                                 </Badge>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                            <td
+                                class="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground"
+                            >
                                 {{ tournament.teams?.length || 0 }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex items-center justify-end gap-2">
-                                    <Link :href="TournamentController.edit.url(tournament.id)">
+                            <td
+                                class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap"
+                            >
+                                <div
+                                    class="flex items-center justify-end gap-2"
+                                >
+                                    <Link
+                                        :href="
+                                            TournamentController.edit.url(
+                                                tournament.id,
+                                            )
+                                        "
+                                    >
                                         <Button variant="ghost" size="icon-sm">
                                             <Edit />
                                         </Button>
@@ -157,22 +185,36 @@ const getTournamentName = () => {
                             </td>
                         </tr>
                         <tr v-if="props.tournaments.length === 0">
-                            <td colspan="4" class="px-6 py-4 text-center text-sm text-muted-foreground">
-                                No tournaments found. Create your first tournament!
+                            <td
+                                colspan="4"
+                                class="px-6 py-4 text-center text-sm text-muted-foreground"
+                            >
+                                No tournaments found. Create your first
+                                tournament!
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <Pagination :pagination="props.pagination" :base-url="'/tournaments'" />
+            <Pagination
+                :pagination="props.pagination"
+                :base-url="'/tournaments'"
+            />
 
-            <Dialog :open="showDeleteDialog" @update:open="showDeleteDialog = $event">
+            <Dialog
+                :open="showDeleteDialog"
+                @update:open="showDeleteDialog = $event"
+            >
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Delete Tournament</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete "<strong>{{ getTournamentName() }}</strong>"? This action cannot be undone and will remove all associated team relationships.
+                            Are you sure you want to delete "<strong>{{
+                                getTournamentName()
+                            }}</strong
+                            >"? This action cannot be undone and will remove all
+                            associated team relationships.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter class="gap-2">

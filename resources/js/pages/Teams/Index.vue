@@ -7,13 +7,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Edit, Plus, Trash2 } from 'lucide-vue-next';
 
-type Team = {
-    id: number;
-    name: string;
-    createdAt: string | null;
-    updatedAt: string | null;
-    logoUrl: string | null;
-};
+type Team = App.Data.TeamData;
 
 type Props = {
     teams: Team[];
@@ -45,7 +39,9 @@ const deleteTeam = (teamId: number) => {
     <Head title="Teams" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+        <div
+            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
+        >
             <div class="flex items-center justify-between">
                 <h1 class="text-2xl font-bold">Teams</h1>
                 <Link :href="TeamController.create.url()">
@@ -56,23 +52,37 @@ const deleteTeam = (teamId: number) => {
                 </Link>
             </div>
 
-            <div class="rounded-lg border border-sidebar-border/70 dark:border-sidebar-border overflow-hidden">
+            <div
+                class="overflow-hidden rounded-lg border border-sidebar-border/70 dark:border-sidebar-border"
+            >
                 <table class="w-full">
                     <thead class="bg-muted/50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                            >
                                 Logo
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                            >
                                 Name
                             </th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th
+                                class="px-6 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                            >
                                 Actions
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-sidebar-border/70 dark:divide-sidebar-border">
-                        <tr v-for="team in props.teams" :key="team.id" class="hover:bg-muted/50">
+                    <tbody
+                        class="divide-y divide-sidebar-border/70 dark:divide-sidebar-border"
+                    >
+                        <tr
+                            v-for="team in props.teams"
+                            :key="team.id"
+                            class="hover:bg-muted/50"
+                        >
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <img
                                     v-if="team.logoUrl"
@@ -87,12 +97,20 @@ const deleteTeam = (teamId: number) => {
                                     {{ team.name.charAt(0) }}
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <td
+                                class="px-6 py-4 text-sm font-medium whitespace-nowrap"
+                            >
                                 {{ team.name }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex items-center justify-end gap-2">
-                                    <Link :href="TeamController.edit.url(team.id)">
+                            <td
+                                class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap"
+                            >
+                                <div
+                                    class="flex items-center justify-end gap-2"
+                                >
+                                    <Link
+                                        :href="TeamController.edit.url(team.id)"
+                                    >
                                         <Button variant="ghost" size="icon-sm">
                                             <Edit />
                                         </Button>
@@ -108,7 +126,10 @@ const deleteTeam = (teamId: number) => {
                             </td>
                         </tr>
                         <tr v-if="props.teams.length === 0">
-                            <td colspan="3" class="px-6 py-4 text-center text-sm text-muted-foreground">
+                            <td
+                                colspan="3"
+                                class="px-6 py-4 text-center text-sm text-muted-foreground"
+                            >
                                 No teams found. Create your first team!
                             </td>
                         </tr>
