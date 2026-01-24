@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { Form, Head, Link } from '@inertiajs/vue3';
+import { Plus, Search, X } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 import TournamentController from '@/actions/App/Http/Controllers/TournamentController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -10,9 +13,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Form, Head, Link } from '@inertiajs/vue3';
-import { Plus, Search, X } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
 
 type Team = App.Data.TeamData;
 
@@ -32,6 +32,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+const teams = ref<Team[]>([...props.teams]);
 const selectedTeams = ref<Array<{ id: number; strength: string | number }>>([]);
 const showModal = ref(false);
 const searchQuery = ref('');
@@ -39,11 +40,11 @@ const searchQuery = ref('');
 const filteredTeams = computed(() => {
     const query = searchQuery.value.toLowerCase().trim();
     if (!query) {
-        return props.teams.filter(
+        return teams.value.filter(
             (team) => !selectedTeams.value.some((st) => st.id === team.id),
         );
     }
-    return props.teams.filter(
+    return teams.value.filter(
         (team) =>
             !selectedTeams.value.some((st) => st.id === team.id) &&
             team.name.toLowerCase().includes(query),
@@ -51,7 +52,7 @@ const filteredTeams = computed(() => {
 });
 
 const getTeam = (teamId: number) => {
-    return props.teams.find((t) => t.id === teamId);
+    return teams.value.find((t) => t.id === teamId);
 };
 
 const addTeam = (teamId: number) => {
@@ -198,7 +199,7 @@ const updateStrength = (teamId: number, strength: string | number) => {
                     </div>
 
                     <div
-                        v-else-if="props.teams.length === 0"
+                        v-else-if="teams.length === 0"
                         class="rounded-lg border border-dashed p-6 text-center"
                     >
                         <p class="text-sm text-muted-foreground">
@@ -301,7 +302,7 @@ const updateStrength = (teamId: number, strength: string | number) => {
                 @update:open="showModal = $event"
                 @team-created="
                     (team) => {
-                        props.teams.push({
+                        teams.value.push({
                             id: team.id,
                             name: team.name,
                             createdAt: null,
