@@ -21,7 +21,9 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     'update:open': [value: boolean];
-    'team-created': [team: { id: number; name: string; logoUrl?: string | null }];
+    'team-created': [
+        team: { id: number; name: string; logoUrl?: string | null },
+    ];
 }>();
 
 const page = usePage();
@@ -96,7 +98,10 @@ const createTeam = () => {
                 <Button variant="outline" @click="close" :disabled="processing">
                     Cancel
                 </Button>
-                <Button @click="createTeam" :disabled="processing || !name.trim()">
+                <Button
+                    @click="createTeam"
+                    :disabled="processing || !name.trim()"
+                >
                     Create Team
                 </Button>
             </DialogFooter>

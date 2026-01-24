@@ -20,11 +20,25 @@ const goToPage = (page: number) => {
 </script>
 
 <template>
-    <div v-if="props.pagination.last_page > 1" class="flex items-center justify-between">
+    <div
+        v-if="props.pagination.last_page > 1"
+        class="flex items-center justify-between"
+    >
         <div class="text-sm text-muted-foreground">
-            Showing {{ (props.pagination.current_page - 1) * props.pagination.per_page + 1 }} to
-            {{ Math.min(props.pagination.current_page * props.pagination.per_page, props.pagination.total) }} of
-            {{ props.pagination.total }} results
+            Showing
+            {{
+                (props.pagination.current_page - 1) *
+                    props.pagination.per_page +
+                1
+            }}
+            to
+            {{
+                Math.min(
+                    props.pagination.current_page * props.pagination.per_page,
+                    props.pagination.total,
+                )
+            }}
+            of {{ props.pagination.total }} results
         </div>
         <div class="flex gap-2">
             <Button
@@ -36,7 +50,9 @@ const goToPage = (page: number) => {
             </Button>
             <Button
                 variant="outline"
-                :disabled="props.pagination.current_page === props.pagination.last_page"
+                :disabled="
+                    props.pagination.current_page === props.pagination.last_page
+                "
                 @click="goToPage(props.pagination.current_page + 1)"
             >
                 Next
