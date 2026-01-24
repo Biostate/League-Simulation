@@ -5,6 +5,7 @@ namespace App\Data;
 use Carbon\Carbon;
 use Spatie\LaravelData\Data;
 
+/** @typescript */
 class TeamData extends Data
 {
     public function __construct(

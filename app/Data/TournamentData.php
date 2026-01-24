@@ -7,6 +7,7 @@ use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 
+/** @typescript */
 class TournamentData extends Data
 {
     public function __construct(
