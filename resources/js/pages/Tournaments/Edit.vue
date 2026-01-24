@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { Form, Head, Link } from '@inertiajs/vue3';
-import { Plus } from 'lucide-vue-next';
+import { Plus, X } from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
 import TournamentController from '@/actions/App/Http/Controllers/TournamentController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import TeamCreationModal from '@/components/TeamCreationModal.vue';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -73,15 +74,11 @@ const updateStrength = (teamId: number, strength: string | number) => {
     }
 };
 
-const getTeamName = (teamId: number) => {
-    return teams.value.find((t) => t.id === teamId)?.name || '';
+const getTeam = (teamId: number) => {
+    return teams.value.find((t) => t.id === teamId);
 };
 
-const getTeamLogo = (teamId: number) => {
-    return teams.value.find((t) => t.id === teamId)?.logoUrl || null;
-};
-
-const handleTeamCreated = (team: { id: number; name: string }) => {
+const handleTeamCreated = (team: { id: number; name: string; logoUrl?: string | null }) => {
     teams.value.push({
         id: team.id,
         name: team.name,
@@ -110,14 +107,6 @@ const handleTeamCreated = (team: { id: number; name: string }) => {
                 v-bind="TournamentController.update.form(props.tournament.id)"
                 class="max-w-4xl space-y-6"
                 v-slot="{ errors, processing, recentlySuccessful }"
-                @submit="
-                    (e) => {
-                        const formData = new FormData(
-                            e.target as HTMLFormElement,
-                        );
-                        formData.append('teams', JSON.stringify(selectedTeams));
-                    }
-                "
             >
                 <div class="grid gap-2">
                     <Label for="name">Tournament Name</Label>
@@ -154,7 +143,7 @@ const handleTeamCreated = (team: { id: number; name: string }) => {
                     :class="{ 'pointer-events-none opacity-50': !isEditable }"
                 >
                     <div class="flex items-center justify-between">
-                        <Label>Teams</Label>
+                        <Label class="text-sm font-medium uppercase tracking-wider text-muted-foreground">Teams</Label>
                         <Button
                             type="button"
                             variant="outline"
@@ -165,124 +154,131 @@ const handleTeamCreated = (team: { id: number; name: string }) => {
                         </Button>
                     </div>
 
-                    <div class="space-y-2">
-                        <Label for="team-select">Select Team</Label>
-                        <select
-                            id="team-select"
-                            class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                            @change="
-                                (e) => {
-                                    const teamId = parseInt(
-                                        (e.target as HTMLSelectElement).value,
-                                    );
-                                    if (teamId) {
-                                        addTeam(teamId);
-                                        (e.target as HTMLSelectElement).value =
-                                            '';
-                                    }
-                                }
-                            "
+                    <div class="flex items-start gap-4 overflow-x-auto pb-2">
+                        <!-- Selected Teams (Full Color) -->
+                        <div
+                            v-for="selectedTeam in selectedTeams"
+                            :key="selectedTeam.id"
+                            class="flex shrink-0 flex-col items-center gap-2"
                         >
-                            <option value="">Select a team...</option>
-                            <option
-                                v-for="team in availableTeams"
-                                :key="team.id"
-                                :value="team.id"
-                            >
-                                {{ team.name }}
-                            </option>
-                        </select>
+                            <div class="relative">
+                                <Avatar class="size-16">
+                                    <AvatarImage
+                                        v-if="getTeam(selectedTeam.id)?.logoUrl"
+                                        :src="getTeam(selectedTeam.id)!.logoUrl!"
+                                        :alt="getTeam(selectedTeam.id)?.name || ''"
+                                    />
+                                    <AvatarFallback class="text-lg">
+                                        {{ getTeam(selectedTeam.id)?.name?.charAt(0) }}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    class="absolute -right-1 -top-1 size-6 rounded-full bg-background p-0 shadow-sm hover:bg-destructive hover:text-destructive-foreground"
+                                    @click="removeTeam(selectedTeam.id)"
+                                >
+                                    <X class="size-3" />
+                                </Button>
+                            </div>
+                            <span class="text-sm font-semibold">{{ getTeam(selectedTeam.id)?.name }}</span>
+                        </div>
+
+                        <!-- Available Teams (Grayscale with + overlay) -->
+                        <div
+                            v-for="team in availableTeams"
+                            :key="team.id"
+                            class="relative flex shrink-0 flex-col items-center gap-2 cursor-pointer"
+                            @click="addTeam(team.id)"
+                        >
+                            <div class="relative">
+                                <Avatar class="size-16" style="filter: grayscale(100%)">
+                                    <AvatarImage
+                                        v-if="team.logoUrl"
+                                        :src="team.logoUrl"
+                                        :alt="team.name"
+                                    />
+                                    <AvatarFallback class="text-lg">
+                                        {{ team.name.charAt(0) }}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div class="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full bg-background shadow-sm">
+                                    <Plus class="size-4 text-foreground" />
+                                </div>
+                            </div>
+                            <span class="text-sm font-semibold">{{ team.name }}</span>
+                        </div>
+
+                        <!-- Add Button -->
+                        <button
+                            type="button"
+                            class="flex shrink-0 flex-col items-center gap-2 transition-colors hover:opacity-80"
+                            @click="showModal = true"
+                        >
+                            <div class="flex size-16 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/40 bg-transparent">
+                                <Plus class="size-8 text-muted-foreground" />
+                            </div>
+                            <span class="text-sm font-semibold">Add</span>
+                        </button>
                     </div>
 
-                    <div
-                        v-if="selectedTeams.length > 0"
-                        class="overflow-hidden rounded-lg border border-sidebar-border/70 dark:border-sidebar-border"
-                    >
-                        <table class="w-full">
-                            <thead class="bg-muted/50">
-                                <tr>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                                    >
-                                        Logo
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                                    >
-                                        Team
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                                    >
-                                        Strength
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                                    >
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody
-                                class="divide-y divide-sidebar-border/70 dark:divide-sidebar-border"
+                    <div class="space-y-3 rounded-lg border-2 border-primary/20 bg-muted/30 p-4">
+                        <Label class="text-base font-semibold"
+                            >Team Strength Points</Label
+                        >
+                        <div v-if="selectedTeams.length > 0" class="space-y-2">
+                            <div
+                                v-for="selectedTeam in selectedTeams"
+                                :key="selectedTeam.id"
+                                class="flex items-center gap-3 rounded-md border bg-background p-3"
                             >
-                                <tr
-                                    v-for="selectedTeam in selectedTeams"
-                                    :key="selectedTeam.id"
-                                    class="hover:bg-muted/50"
-                                >
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <img
-                                            v-if="getTeamLogo(selectedTeam.id)"
-                                            :src="getTeamLogo(selectedTeam.id)"
-                                            :alt="getTeamName(selectedTeam.id)"
-                                            class="h-10 w-10 object-contain"
-                                        />
-                                        <div
-                                            v-else
-                                            class="flex h-10 w-10 items-center justify-center rounded bg-muted text-xs font-medium"
-                                        >
-                                            {{
-                                                getTeamName(
+                                <Avatar class="h-10 w-10 shrink-0">
+                                    <AvatarImage
+                                        v-if="getTeam(selectedTeam.id)?.logoUrl"
+                                        :src="getTeam(selectedTeam.id)!.logoUrl!"
+                                        :alt="getTeam(selectedTeam.id)?.name || ''"
+                                    />
+                                    <AvatarFallback>
+                                        {{
+                                            getTeam(
+                                                selectedTeam.id,
+                                            )?.name?.charAt(0)
+                                        }}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <span class="flex-1 font-medium">
+                                    {{ getTeam(selectedTeam.id)?.name }}
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <Label
+                                        :for="`strength-${selectedTeam.id}`"
+                                        class="text-sm text-muted-foreground"
+                                    >
+                                        Strength:
+                                    </Label>
+                                    <Input
+                                        :id="`strength-${selectedTeam.id}`"
+                                        type="text"
+                                        :model-value="selectedTeam.strength"
+                                        @update:model-value="
+                                            (value) =>
+                                                updateStrength(
                                                     selectedTeam.id,
-                                                ).charAt(0)
-                                            }}
-                                        </div>
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 text-sm font-medium whitespace-nowrap"
-                                    >
-                                        {{ getTeamName(selectedTeam.id) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <Input
-                                            type="text"
-                                            :model-value="selectedTeam.strength"
-                                            @update:model-value="
-                                                (value) =>
-                                                    updateStrength(
-                                                        selectedTeam.id,
-                                                        value,
-                                                    )
-                                            "
-                                            class="w-24"
-                                        />
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 text-right whitespace-nowrap"
-                                    >
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            @click="removeTeam(selectedTeam.id)"
-                                        >
-                                            Remove
-                                        </Button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                                    value,
+                                                )
+                                        "
+                                        class="w-24"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            v-else
+                            class="py-8 text-center text-sm text-muted-foreground"
+                        >
+                            Select teams above to set their strength points.
+                        </div>
                     </div>
                     <InputError class="mt-2" :message="errors.teams" />
                 </div>

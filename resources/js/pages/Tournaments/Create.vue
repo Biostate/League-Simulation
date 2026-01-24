@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form, Head, Link } from '@inertiajs/vue3';
-import { Plus, Search, X } from 'lucide-vue-next';
+import { Plus, X } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import TournamentController from '@/actions/App/Http/Controllers/TournamentController';
 import Heading from '@/components/Heading.vue';
@@ -8,7 +8,6 @@ import InputError from '@/components/InputError.vue';
 import TeamCreationModal from '@/components/TeamCreationModal.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -35,19 +34,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 const teams = ref<Team[]>([...props.teams]);
 const selectedTeams = ref<Array<{ id: number; strength: string | number }>>([]);
 const showModal = ref(false);
-const searchQuery = ref('');
 
-const filteredTeams = computed(() => {
-    const query = searchQuery.value.toLowerCase().trim();
-    if (!query) {
-        return teams.value.filter(
-            (team) => !selectedTeams.value.some((st) => st.id === team.id),
-        );
-    }
+const availableTeams = computed(() => {
     return teams.value.filter(
-        (team) =>
-            !selectedTeams.value.some((st) => st.id === team.id) &&
-            team.name.toLowerCase().includes(query),
+        (team) => !selectedTeams.value.some((st) => st.id === team.id),
     );
 });
 
@@ -58,7 +48,6 @@ const getTeam = (teamId: number) => {
 const addTeam = (teamId: number) => {
     if (!selectedTeams.value.some((st) => st.id === teamId)) {
         selectedTeams.value.push({ id: teamId, strength: '' });
-        searchQuery.value = '';
     }
 };
 
@@ -74,6 +63,17 @@ const updateStrength = (teamId: number, strength: string | number) => {
             strength,
         };
     }
+};
+
+const handleTeamCreated = (team: { id: number; name: string; logoUrl?: string | null }) => {
+    teams.value.push({
+        id: team.id,
+        name: team.name,
+        createdAt: null,
+        updatedAt: null,
+        logoUrl: team.logoUrl || null,
+    });
+    addTeam(team.id);
 };
 </script>
 
@@ -94,14 +94,6 @@ const updateStrength = (teamId: number, strength: string | number) => {
                 v-bind="TournamentController.store.form()"
                 class="max-w-4xl space-y-6"
                 v-slot="{ errors, processing, recentlySuccessful }"
-                @submit="
-                    (e) => {
-                        const formData = new FormData(
-                            e.target as HTMLFormElement,
-                        );
-                        formData.append('teams', JSON.stringify(selectedTeams));
-                    }
-                "
             >
                 <div class="grid gap-2">
                     <Label for="name">Tournament Name</Label>
@@ -124,7 +116,7 @@ const updateStrength = (teamId: number, strength: string | number) => {
 
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
-                        <Label>Teams</Label>
+                        <Label class="text-sm font-medium uppercase tracking-wider text-muted-foreground">Teams</Label>
                         <Button
                             type="button"
                             variant="outline"
@@ -136,86 +128,80 @@ const updateStrength = (teamId: number, strength: string | number) => {
                         </Button>
                     </div>
 
-                    <div class="space-y-3">
-                        <Label for="team-search">Search Teams</Label>
-                        <div class="relative">
-                            <Search
-                                class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                            />
-                            <Input
-                                id="team-search"
-                                v-model="searchQuery"
-                                class="pl-9"
-                                placeholder="Search teams..."
-                                autocomplete="off"
-                            />
+                    <div class="flex items-start gap-4 overflow-x-auto pb-2">
+                        <!-- Selected Teams (Full Color) -->
+                        <div
+                            v-for="selectedTeam in selectedTeams"
+                            :key="selectedTeam.id"
+                            class="flex shrink-0 flex-col items-center gap-2"
+                        >
+                            <div class="relative">
+                                <Avatar class="size-16">
+                                    <AvatarImage
+                                        v-if="getTeam(selectedTeam.id)?.logoUrl"
+                                        :src="getTeam(selectedTeam.id)!.logoUrl!"
+                                        :alt="getTeam(selectedTeam.id)?.name || ''"
+                                    />
+                                    <AvatarFallback class="text-lg">
+                                        {{ getTeam(selectedTeam.id)?.name?.charAt(0) }}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    class="absolute -right-1 -top-1 size-6 rounded-full bg-background p-0 shadow-sm hover:bg-destructive hover:text-destructive-foreground"
+                                    @click="removeTeam(selectedTeam.id)"
+                                >
+                                    <X class="size-3" />
+                                </Button>
+                            </div>
+                            <span class="text-sm font-semibold">{{ getTeam(selectedTeam.id)?.name }}</span>
                         </div>
-                    </div>
 
-                    <div
-                        v-if="filteredTeams.length > 0"
-                        class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
-                    >
-                        <Card
-                            v-for="team in filteredTeams"
+                        <!-- Available Teams (Grayscale with + overlay) -->
+                        <div
+                            v-for="team in availableTeams"
                             :key="team.id"
-                            class="cursor-pointer transition-all hover:border-primary"
+                            class="relative flex shrink-0 flex-col items-center gap-2 cursor-pointer"
                             @click="addTeam(team.id)"
                         >
-                            <CardContent class="flex items-center gap-2 p-3">
-                                <Avatar class="h-8 w-8 shrink-0">
+                            <div class="relative">
+                                <Avatar class="size-16" style="filter: grayscale(100%)">
                                     <AvatarImage
                                         v-if="team.logoUrl"
                                         :src="team.logoUrl"
                                         :alt="team.name"
                                     />
-                                    <AvatarFallback class="text-xs">
+                                    <AvatarFallback class="text-lg">
                                         {{ team.name.charAt(0) }}
                                     </AvatarFallback>
                                 </Avatar>
-                                <p class="truncate text-sm font-medium">
-                                    {{ team.name }}
-                                </p>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    class="ml-auto h-6 w-6 shrink-0 p-0"
-                                    @click.stop="addTeam(team.id)"
-                                >
-                                    <Plus class="h-3 w-3" />
-                                </Button>
-                            </CardContent>
-                        </Card>
+                                <div class="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full bg-background shadow-sm">
+                                    <Plus class="size-4 text-foreground" />
+                                </div>
+                            </div>
+                            <span class="text-sm font-semibold">{{ team.name }}</span>
+                        </div>
+
+                        <!-- Add Button -->
+                        <button
+                            type="button"
+                            class="flex shrink-0 flex-col items-center gap-2 transition-colors hover:opacity-80"
+                            @click="showModal = true"
+                        >
+                            <div class="flex size-16 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/40 bg-transparent">
+                                <Plus class="size-8 text-muted-foreground" />
+                            </div>
+                            <span class="text-sm font-semibold">Add</span>
+                        </button>
                     </div>
 
-                    <div
-                        v-else-if="searchQuery && filteredTeams.length === 0"
-                        class="rounded-lg border border-dashed p-6 text-center"
-                    >
-                        <p class="text-sm text-muted-foreground">
-                            No teams found matching "{{ searchQuery }}"
-                        </p>
-                    </div>
-
-                    <div
-                        v-else-if="teams.length === 0"
-                        class="rounded-lg border border-dashed p-6 text-center"
-                    >
-                        <p class="text-sm text-muted-foreground">
-                            No teams available. Create your first team to get
-                            started.
-                        </p>
-                    </div>
-
-                    <div
-                        v-if="selectedTeams.length > 0"
-                        class="space-y-3 rounded-lg border-2 border-primary/20 bg-muted/30 p-4"
-                    >
+                    <div class="space-y-3 rounded-lg border-2 border-primary/20 bg-muted/30 p-4">
                         <Label class="text-base font-semibold"
                             >Team Strength Points</Label
                         >
-                        <div class="space-y-2">
+                        <div v-if="selectedTeams.length > 0" class="space-y-2">
                             <div
                                 v-for="selectedTeam in selectedTeams"
                                 :key="selectedTeam.id"
@@ -224,8 +210,8 @@ const updateStrength = (teamId: number, strength: string | number) => {
                                 <Avatar class="h-10 w-10 shrink-0">
                                     <AvatarImage
                                         v-if="getTeam(selectedTeam.id)?.logoUrl"
-                                        :src="getTeam(selectedTeam.id)?.logoUrl"
-                                        :alt="getTeam(selectedTeam.id)?.name"
+                                        :src="getTeam(selectedTeam.id)!.logoUrl!"
+                                        :alt="getTeam(selectedTeam.id)?.name || ''"
                                     />
                                     <AvatarFallback>
                                         {{
@@ -259,16 +245,13 @@ const updateStrength = (teamId: number, strength: string | number) => {
                                         class="w-24"
                                     />
                                 </div>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    class="h-8 w-8 shrink-0 p-0"
-                                    @click="removeTeam(selectedTeam.id)"
-                                >
-                                    <X class="h-4 w-4" />
-                                </Button>
                             </div>
+                        </div>
+                        <div
+                            v-else
+                            class="py-8 text-center text-sm text-muted-foreground"
+                        >
+                            Select teams above to set their strength points.
                         </div>
                     </div>
 
@@ -300,18 +283,7 @@ const updateStrength = (teamId: number, strength: string | number) => {
             <TeamCreationModal
                 :open="showModal"
                 @update:open="showModal = $event"
-                @team-created="
-                    (team) => {
-                        teams.value.push({
-                            id: team.id,
-                            name: team.name,
-                            createdAt: null,
-                            updatedAt: null,
-                            logoUrl: team.logoUrl || null,
-                        });
-                        addTeam(team.id);
-                    }
-                "
+                @team-created="handleTeamCreated"
             />
         </div>
     </AppLayout>
