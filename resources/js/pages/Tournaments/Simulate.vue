@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AllWeeks from '@/components/AllWeeks.vue';
 import LeagueTable from '@/components/LeagueTable.vue';
+import UpdateMatchModal from '@/components/UpdateMatchModal.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -110,6 +111,9 @@ const canPlay = computed(() => {
 
 const processingNextWeek = ref(false);
 const processingAllWeeks = ref(false);
+const processingRollback = ref(false);
+const selectedMatch = ref<Match | null>(null);
+const isModalOpen = ref(false);
 
 const playNextWeek = () => {
     if (processingNextWeek.value) {
@@ -123,6 +127,9 @@ const playNextWeek = () => {
         {},
         {
             preserveScroll: true,
+            onSuccess: () => {
+                router.reload({ only: ['tournament', 'matches', 'standings', 'predictions'] });
+            },
             onFinish: () => {
                 processingNextWeek.value = false;
             },
@@ -142,6 +149,9 @@ const playAllSimulation = () => {
         {},
         {
             preserveScroll: true,
+            onSuccess: () => {
+                router.reload({ only: ['tournament', 'matches', 'standings', 'predictions'] });
+            },
             onFinish: () => {
                 processingAllWeeks.value = false;
             },
@@ -161,6 +171,37 @@ const leagueTableData = computed(() => {
         prediction: props.predictions?.[standing.teamId] ?? 0,
     }));
 });
+
+const handleMatchClick = (match: Match) => {
+    selectedMatch.value = match;
+    isModalOpen.value = true;
+};
+
+const handleMatchUpdated = () => {
+    router.reload({ only: ['matches', 'standings'] });
+};
+
+const handleRollbackWeek = (week: number) => {
+    if (processingRollback.value) {
+        return;
+    }
+
+    processingRollback.value = true;
+
+    router.post(
+        `/tournaments/${props.tournament.id}/rollback-week/${week}`,
+        {},
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                router.reload({ only: ['tournament', 'matches', 'standings', 'predictions'] });
+            },
+            onFinish: () => {
+                processingRollback.value = false;
+            },
+        },
+    );
+};
 </script>
 
 <template>
@@ -198,8 +239,21 @@ const leagueTableData = computed(() => {
             />
 
             <!-- All Weeks Section -->
-            <AllWeeks :fixtures="fixtures" :current-week="currentWeek" />
+            <AllWeeks
+                :fixtures="fixtures"
+                :current-week="currentWeek"
+                @match-clicked="handleMatchClick"
+                @rollback-week="handleRollbackWeek"
+            />
         </div>
+
+        <!-- Update Match Modal -->
+        <UpdateMatchModal
+            v-model:open="isModalOpen"
+            :match="selectedMatch"
+            :tournament-id="tournament.id"
+            @updated="handleMatchUpdated"
+        />
 
         <!-- Action Dock -->
         <div

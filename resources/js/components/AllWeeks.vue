@@ -11,7 +11,20 @@ type Props = {
     currentWeek: number;
 };
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+const emit = defineEmits<{
+    'match-clicked': [match: App.Data.MatchData];
+    'rollback-week': [week: number];
+}>();
+
+const handleMatchClick = (match: App.Data.MatchData) => {
+    emit('match-clicked', match);
+};
+
+const handleRollback = (week: number) => {
+    emit('rollback-week', week);
+};
 </script>
 
 <template>
@@ -29,6 +42,9 @@ defineProps<Props>();
                     :week="fixture.week"
                     :matches="fixture.matches"
                     :is-current-week="fixture.week === currentWeek"
+                    :current-week="props.currentWeek"
+                    @match-clicked="handleMatchClick"
+                    @rollback-week="handleRollback"
                 />
             </div>
         </div>

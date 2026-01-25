@@ -1,11 +1,39 @@
 <script setup lang="ts">
+import { Button } from '@/components/ui/button';
+
 type Props = {
     week: number;
     matches: App.Data.MatchData[];
     isCurrentWeek: boolean;
+    currentWeek: number;
 };
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+const emit = defineEmits<{
+    'match-clicked': [match: App.Data.MatchData];
+    'rollback-week': [week: number];
+}>();
+
+const handleMatchClick = (match: App.Data.MatchData) => {
+    // Don't allow editing matches in future weeks
+    if (match.week > props.currentWeek) {
+        return;
+    }
+    emit('match-clicked', match);
+};
+
+const handleRollback = () => {
+    emit('rollback-week', props.week);
+};
+
+// Can rollback only to weeks before the current week (not the current week itself)
+const canRollback = props.week < props.currentWeek && props.week > 0;
+
+// Can edit matches only in weeks <= current week
+const canEditMatch = (match: App.Data.MatchData) => {
+    return match.week <= props.currentWeek;
+};
 </script>
 
 <template>
@@ -30,15 +58,26 @@ defineProps<Props>();
         />
         <div class="relative">
             <div class="mb-5 flex items-center justify-between">
-                <h3
-                    class="text-lg font-bold"
-                    :class="{
-                        'text-primary': isCurrentWeek,
-                        'text-foreground': !isCurrentWeek,
-                    }"
-                >
-                    Week {{ week }}
-                </h3>
+                <div class="flex items-center gap-3">
+                    <h3
+                        class="text-lg font-bold"
+                        :class="{
+                            'text-primary': isCurrentWeek,
+                            'text-foreground': !isCurrentWeek,
+                        }"
+                    >
+                        Week {{ week }}
+                    </h3>
+                    <Button
+                        v-if="canRollback"
+                        variant="outline"
+                        size="sm"
+                        @click="handleRollback"
+                        class="h-7 text-xs"
+                    >
+                        Rollback Here
+                    </Button>
+                </div>
                 <div
                     v-if="isCurrentWeek"
                     class="flex size-2 rounded-full bg-primary"
@@ -48,7 +87,12 @@ defineProps<Props>();
                 <div
                     v-for="(match, index) in matches"
                     :key="index"
-                    class="flex items-center justify-between rounded-lg border border-sidebar-border bg-muted/10 px-4 py-3 transition-colors hover:bg-muted/20"
+                    class="flex items-center justify-between rounded-lg border border-sidebar-border px-4 py-3 transition-colors"
+                    :class="{
+                        'cursor-pointer bg-muted/10 hover:bg-muted/20': canEditMatch(match),
+                        'cursor-not-allowed bg-muted/5 opacity-60': !canEditMatch(match),
+                    }"
+                    @click="handleMatchClick(match)"
                 >
                     <span
                         class="flex-1 text-right text-sm font-semibold text-foreground"

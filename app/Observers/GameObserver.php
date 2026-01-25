@@ -20,10 +20,8 @@ class GameObserver
      */
     public function updated(Game $game): void
     {
-        if ($game->is_played && $game->home_score !== null && $game->away_score !== null) {
-            $standingService = new StandingService;
-            $standingService->updateStandings($game);
-        }
+        $standingService = new StandingService;
+        $standingService->updateStandings($game);
     }
 
     /**
