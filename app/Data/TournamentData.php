@@ -15,6 +15,7 @@ class TournamentData extends Data
         public string $name,
         public TournamentStatus $status,
         public int $userId,
+        public int $currentWeek,
         #[DataCollectionOf(TeamTournamentData::class)]
         public ?DataCollection $teams,
     ) {}

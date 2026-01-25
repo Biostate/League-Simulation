@@ -68,6 +68,7 @@ class TournamentController extends Controller
             'name' => $validated['name'],
             'status' => TournamentStatus::CREATED,
             'user_id' => Auth::id(),
+            'current_week' => 1,
         ]);
 
         if (isset($validated['teams']) && is_array($validated['teams'])) {

@@ -18,6 +18,7 @@ class Tournament extends Model
         'name',
         'status',
         'user_id',
+        'current_week',
     ];
 
     protected $casts = [
