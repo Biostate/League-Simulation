@@ -11,9 +11,25 @@ class TeamSeeder extends Seeder
     {
         $teams = [
             'Arsenal' => 'arsenal.svg',
-            'Manchester United' => 'manchester_united.svg',
-            'Liverpool' => 'liverpool.svg',
+            'Aston Villa' => 'aston_villa.svg',
+            'Bournemouth' => 'bournemouth.svg',
+            'Brentford' => 'brentford.svg',
+            'Brighton & Hove Albion' => 'brighton_and_hove_albion.svg',
+            'Burnley' => 'burnley.svg',
             'Chelsea' => 'chelsea.svg',
+            'Crystal Palace' => 'crystal_palace.svg',
+            'Everton' => 'everton.svg',
+            'Fulham' => 'fulham.svg',
+            'Leeds United' => 'leeds_united.svg',
+            'Liverpool' => 'liverpool.svg',
+            'Manchester City' => 'manchester_city.svg',
+            'Manchester United' => 'manchester_united.svg',
+            'Newcastle United' => 'newcastle_united.svg',
+            'Sunderland' => 'sunderland.svg',
+            'Tottenham Hotspur' => 'tottenham_hotspur.svg',
+            'West Ham United' => 'west_ham_united.svg',
+            'Wolverhampton Wanderers' => 'wolverhampton_wanderers.svg',
+            'Nottingham Forest' => 'nottingham_forest.svg',
         ];
 
         foreach ($teams as $teamName => $logoFile) {
