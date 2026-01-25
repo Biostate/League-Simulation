@@ -6,23 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('tournaments', function (Blueprint $table) {
-            $table->integer('current_week')->default(0)->after('status');
+            $table->integer('total_weeks')->default(0)->after('current_week');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('tournaments', function (Blueprint $table) {
-            $table->dropColumn('current_week');
+            $table->dropColumn('total_weeks');
         });
     }
 };

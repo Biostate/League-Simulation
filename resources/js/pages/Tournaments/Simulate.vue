@@ -5,9 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { Play, PlayCircle } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 type Tournament = App.Data.TournamentData;
 type Match = App.Data.MatchData;
@@ -54,7 +54,7 @@ const weeks = computed(() => {
 });
 
 const totalWeeks = computed(() => {
-    return weeks.value.length > 0 ? Math.max(...weeks.value) : 0;
+    return props.tournament.totalWeeks;
 });
 
 const currentWeek = computed(() => {
@@ -66,8 +66,9 @@ const showPredictions = computed(() => {
 });
 
 const fixtures = computed(() => {
+    const maxWeekToShow = Math.min(currentWeek.value + 1, totalWeeks.value);
     return weeks.value
-        .filter((week) => week <= currentWeek.value)
+        .filter((week) => week <= maxWeekToShow)
         .map((week) => ({
             week,
             matches: matchesByWeek.value[week],
@@ -98,14 +99,53 @@ const getStatusBadgeVariant = (status: App.Enums.TournamentStatus) => {
     }
 };
 
+const isCompleted = computed(() => {
+    return props.tournament.status === 'completed';
+});
+
+const canPlay = computed(() => {
+    return !isCompleted.value && currentWeek.value < totalWeeks.value;
+});
+
+const processingNextWeek = ref(false);
+const processingAllWeeks = ref(false);
+
 const playNextWeek = () => {
-    // TODO: Implement backend call
-    console.log('Play next week');
+    if (processingNextWeek.value) {
+        return;
+    }
+
+    processingNextWeek.value = true;
+
+    router.post(
+        `/tournaments/${props.tournament.id}/play-next-week`,
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                processingNextWeek.value = false;
+            },
+        },
+    );
 };
 
 const playAllSimulation = () => {
-    // TODO: Implement backend call
-    console.log('Play all simulation');
+    if (processingAllWeeks.value) {
+        return;
+    }
+
+    processingAllWeeks.value = true;
+
+    router.post(
+        `/tournaments/${props.tournament.id}/play-all-weeks`,
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                processingAllWeeks.value = false;
+            },
+        },
+    );
 };
 
 const leagueTableData = computed(() => {
@@ -167,13 +207,20 @@ const leagueTableData = computed(() => {
             <div
                 class="mx-auto flex max-w-7xl items-center justify-end gap-3 px-4 py-4"
             >
-                <Button variant="outline" @click="playAllSimulation">
+                <Button
+                    variant="outline"
+                    @click="playAllSimulation"
+                    :disabled="!canPlay || processingAllWeeks || processingNextWeek"
+                >
                     <PlayCircle class="mr-2 size-4" />
-                    Play All Simulation
+                    {{ processingAllWeeks ? 'Playing...' : 'Play All Simulation' }}
                 </Button>
-                <Button @click="playNextWeek">
+                <Button
+                    @click="playNextWeek"
+                    :disabled="!canPlay || processingNextWeek || processingAllWeeks"
+                >
                     <Play class="mr-2 size-4" />
-                    Play Next Week
+                    {{ processingNextWeek ? 'Playing...' : 'Play Next Week' }}
                 </Button>
             </div>
         </div>

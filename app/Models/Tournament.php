@@ -19,10 +19,13 @@ class Tournament extends Model
         'status',
         'user_id',
         'current_week',
+        'total_weeks',
     ];
 
     protected $casts = [
         'status' => TournamentStatus::class,
+        'current_week' => 'integer',
+        'total_weeks' => 'integer',
     ];
 
     public function user(): BelongsTo

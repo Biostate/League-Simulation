@@ -66,11 +66,15 @@ class TournamentController extends Controller
 
         $validated = $request->validated();
 
+        $teamCount = isset($validated['teams']) && is_array($validated['teams']) ? count($validated['teams']) : 0;
+        $totalWeeks = MatchGenerationService::calculateTotalWeeks($teamCount);
+
         $tournament = Tournament::create([
             'name' => $validated['name'],
             'status' => TournamentStatus::CREATED,
             'user_id' => Auth::id(),
-            'current_week' => 1,
+            'current_week' => 0,
+            'total_weeks' => $totalWeeks,
         ]);
 
         if (isset($validated['teams']) && is_array($validated['teams'])) {
@@ -130,6 +134,13 @@ class TournamentController extends Controller
         ]);
 
         if (isset($validated['teams']) && is_array($validated['teams'])) {
+            $teamCount = count($validated['teams']);
+            $totalWeeks = MatchGenerationService::calculateTotalWeeks($teamCount);
+
+            $tournament->update([
+                'total_weeks' => $totalWeeks,
+            ]);
+
             $teamsData = collect($validated['teams'])->mapWithKeys(function ($team) {
                 return [$team['id'] => ['strength' => $team['strength']]];
             });

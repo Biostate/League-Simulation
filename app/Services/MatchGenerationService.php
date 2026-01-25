@@ -16,12 +16,17 @@ class MatchGenerationService
         $teams = $tournament->teams;
 
         if ($teams->count() < 2) {
+            $tournament->total_weeks = 0;
+            $tournament->save();
+
             return;
         }
 
         $teamIds = $teams->pluck('id')->toArray();
         $matches = $this->generateRoundRobinPairs($teamIds);
         $weekSchedule = $this->distributeMatchesAcrossWeeks($teamIds, $matches);
+
+        $totalWeeks = count($weekSchedule) > 0 ? max(array_keys($weekSchedule)) : 0;
 
         foreach ($weekSchedule as $week => $weekMatches) {
             foreach ($weekMatches as $match) {
@@ -34,6 +39,20 @@ class MatchGenerationService
                 ]);
             }
         }
+
+        $tournament->total_weeks = $totalWeeks;
+        $tournament->save();
+    }
+
+    public static function calculateTotalWeeks(int $teamCount): int
+    {
+        if ($teamCount < 2) {
+            return 0;
+        }
+
+        $firstHalfWeeks = $teamCount % 2 === 0 ? $teamCount - 1 : $teamCount;
+
+        return 2 * $firstHalfWeeks;
     }
 
     /**

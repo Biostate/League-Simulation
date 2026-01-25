@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form, Head, Link } from '@inertiajs/vue3';
-import { Plus, X } from 'lucide-vue-next';
+import { Plus, Shuffle, X } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import TournamentController from '@/actions/App/Http/Controllers/TournamentController';
 import Heading from '@/components/Heading.vue';
@@ -74,6 +74,13 @@ const handleTeamCreated = (team: { id: number; name: string; logoUrl?: string | 
         logoUrl: team.logoUrl || null,
     });
     addTeam(team.id);
+};
+
+const randomizeStrengths = () => {
+    selectedTeams.value = selectedTeams.value.map((team) => ({
+        ...team,
+        strength: Math.floor(Math.random() * 100) + 1,
+    }));
 };
 </script>
 
@@ -198,9 +205,21 @@ const handleTeamCreated = (team: { id: number; name: string; logoUrl?: string | 
                     </div>
 
                     <div class="space-y-3 rounded-lg border-2 border-primary/20 bg-muted/30 p-4">
-                        <Label class="text-base font-semibold"
-                            >Team Strength Points</Label
-                        >
+                        <div class="flex items-center justify-between">
+                            <Label class="text-base font-semibold"
+                                >Team Strength Points</Label
+                            >
+                            <Button
+                                v-if="selectedTeams.length > 0"
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                @click="randomizeStrengths"
+                            >
+                                <Shuffle class="mr-2 h-4 w-4" />
+                                Randomize Strength Points
+                            </Button>
+                        </div>
                         <div v-if="selectedTeams.length > 0" class="space-y-2">
                             <div
                                 v-for="selectedTeam in selectedTeams"

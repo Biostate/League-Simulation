@@ -33,6 +33,7 @@ class TournamentSeeder extends Seeder
             'name' => 'Premier League Tournament',
             'status' => TournamentStatus::CREATED,
             'user_id' => $user->id,
+            'current_week' => 0,
         ]);
 
         $teamsData = $teams->mapWithKeys(function ($team) {
