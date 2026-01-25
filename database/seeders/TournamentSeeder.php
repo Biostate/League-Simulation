@@ -7,6 +7,7 @@ use App\Models\Team;
 use App\Models\Tournament;
 use App\Models\User;
 use App\Services\MatchGenerationService;
+use App\Services\StandingService;
 use Illuminate\Database\Seeder;
 
 class TournamentSeeder extends Seeder
@@ -39,6 +40,9 @@ class TournamentSeeder extends Seeder
         });
 
         $tournament->teams()->sync($teamsData);
+
+        $standingService = new StandingService;
+        $standingService->createStandings($tournament);
 
         if ($tournament->teams()->count() >= 2) {
             $matchGenerationService = new MatchGenerationService;

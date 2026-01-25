@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Data\MatchData;
+use App\Data\StandingData;
 use App\Data\TeamData;
 use App\Data\TeamTournamentData;
 use App\Data\TournamentData;
@@ -12,6 +13,7 @@ use App\Http\Requests\TournamentUpdateRequest;
 use App\Models\Team;
 use App\Models\Tournament;
 use App\Services\MatchGenerationService;
+use App\Services\StandingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -78,6 +80,9 @@ class TournamentController extends Controller
 
             $tournament->teams()->sync($teamsData);
 
+            $standingService = new StandingService;
+            $standingService->createStandings($tournament);
+
             if ($tournament->teams()->count() >= 2) {
                 $matchGenerationService = new MatchGenerationService;
                 $matchGenerationService->generateMatches($tournament);
@@ -133,6 +138,9 @@ class TournamentController extends Controller
 
             $tournament->matches()->delete();
 
+            $standingService = new StandingService;
+            $standingService->createStandings($tournament);
+
             if ($tournament->teams()->count() >= 2) {
                 $matchGenerationService = new MatchGenerationService;
                 $matchGenerationService->generateMatches($tournament);
@@ -161,13 +169,24 @@ class TournamentController extends Controller
             'teams.media',
             'matches.homeTeam.media',
             'matches.awayTeam.media',
+            'standings.team.media',
         ]);
 
         $matchesData = MatchData::collect($tournament->matches);
 
+        $standings = $tournament->standings()
+            ->with('team.media')
+            ->orderByDesc('points')
+            ->orderByDesc('goal_difference')
+            ->orderByDesc('goals_for')
+            ->get();
+
+        $standingsData = StandingData::collect($standings);
+
         return Inertia::render('Tournaments/Simulate', [
             'tournament' => TournamentData::from($tournament)->toArray(),
             'matches' => $matchesData->toArray(),
+            'standings' => $standingsData->toArray(),
         ]);
     }
 }

@@ -43,6 +43,11 @@ class Team extends Model implements HasMedia
         return $this->hasMany(Game::class, 'away_team_id');
     }
 
+    public function standings(): HasMany
+    {
+        return $this->hasMany(Standing::class);
+    }
+
     public function registerMediaConversions(?Media $media = null): void
     {
         $this

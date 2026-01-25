@@ -11,10 +11,12 @@ import { computed } from 'vue';
 
 type Tournament = App.Data.TournamentData;
 type Match = App.Data.MatchData;
+type Standing = App.Data.StandingData;
 
 type Props = {
     tournament: Tournament;
     matches: Match[];
+    standings: Standing[];
 };
 
 const props = defineProps<Props>();
@@ -96,49 +98,6 @@ const getStatusBadgeVariant = (status: App.Enums.TournamentStatus) => {
     }
 };
 
-const mockLeagueTable = [
-    {
-        team: 'Chelsea',
-        pts: 10,
-        played: 4,
-        wins: 3,
-        draws: 1,
-        losses: 0,
-        goalDifference: 14,
-        prediction: 65,
-    },
-    {
-        team: 'Arsenal',
-        pts: 8,
-        played: 4,
-        wins: 2,
-        draws: 2,
-        losses: 0,
-        goalDifference: 6,
-        prediction: 25,
-    },
-    {
-        team: 'Manchester City',
-        pts: 8,
-        played: 4,
-        wins: 2,
-        draws: 2,
-        losses: 0,
-        goalDifference: 4,
-        prediction: 25,
-    },
-    {
-        team: 'Liverpool',
-        pts: 4,
-        played: 4,
-        wins: 1,
-        draws: 1,
-        losses: 2,
-        goalDifference: 0,
-        prediction: 5,
-    },
-];
-
 const playNextWeek = () => {
     // TODO: Implement backend call
     console.log('Play next week');
@@ -148,6 +107,19 @@ const playAllSimulation = () => {
     // TODO: Implement backend call
     console.log('Play all simulation');
 };
+
+const leagueTableData = computed(() => {
+    return props.standings.map((standing) => ({
+        team: standing.team?.name || 'Unknown',
+        pts: standing.points,
+        played: standing.played,
+        wins: standing.won,
+        draws: standing.drawn,
+        losses: standing.lost,
+        goalDifference: standing.goalDifference,
+        prediction: 0, // TODO: Calculate prediction
+    }));
+});
 </script>
 
 <template>
@@ -180,7 +152,7 @@ const playAllSimulation = () => {
 
             <!-- League Table -->
             <LeagueTable
-                :teams="mockLeagueTable"
+                :teams="leagueTableData"
                 :show-predictions="showPredictions"
             />
 
