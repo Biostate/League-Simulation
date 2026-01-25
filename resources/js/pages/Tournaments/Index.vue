@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { Head, Link, router } from '@inertiajs/vue3';
+import { Edit, Play, Plus, Trash2 } from 'lucide-vue-next';
+import { ref } from 'vue';
 import TournamentController from '@/actions/App/Http/Controllers/TournamentController';
 import Pagination from '@/components/Pagination.vue';
 import { Badge } from '@/components/ui/badge';
@@ -13,9 +16,6 @@ import {
 } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { Edit, Play, Plus, Trash2 } from 'lucide-vue-next';
-import { ref } from 'vue';
 
 type Tournament = App.Data.TournamentData;
 

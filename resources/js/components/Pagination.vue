@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button';
 import { router } from '@inertiajs/vue3';
+import { Button } from '@/components/ui/button';
 
 type Props = {
     pagination: {

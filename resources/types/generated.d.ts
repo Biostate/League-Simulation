@@ -11,6 +11,20 @@ declare namespace App.Data {
         homeTeam: App.Data.TeamData | null;
         awayTeam: App.Data.TeamData | null;
     };
+    export type StandingData = {
+        id: number;
+        tournamentId: number;
+        teamId: number;
+        played: number;
+        won: number;
+        drawn: number;
+        lost: number;
+        goalsFor: number;
+        goalsAgainst: number;
+        goalDifference: number;
+        points: number;
+        team: App.Data.TeamData | null;
+    };
     export type TeamData = {
         id: number;
         name: string;
@@ -29,9 +43,15 @@ declare namespace App.Data {
         name: string;
         status: App.Enums.TournamentStatus;
         userId: number;
+        currentWeek: number;
+        totalWeeks: number;
         teams: Array<App.Data.TeamTournamentData> | null;
     };
 }
 declare namespace App.Enums {
-    export type TournamentStatus = 'created' | 'in_progress' | 'completed';
+    export type TournamentStatus =
+        | 'created'
+        | 'in_progress'
+        | 'simulating'
+        | 'completed';
 }

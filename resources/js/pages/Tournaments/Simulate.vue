@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import AllWeeks from '@/components/AllWeeks.vue';
-import LeagueTable from '@/components/LeagueTable.vue';
-import UpdateMatchModal from '@/components/UpdateMatchModal.vue';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import AppLayout from '@/layouts/AppLayout.vue';
-import type { BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
 import { Play, PlayCircle } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import AllWeeks from '@/components/AllWeeks.vue';
+import LeagueTable from '@/components/LeagueTable.vue';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import UpdateMatchModal from '@/components/UpdateMatchModal.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
+import type { BreadcrumbItem } from '@/types';
 
 type Tournament = App.Data.TournamentData;
 type Match = App.Data.MatchData;

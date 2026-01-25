@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { Form, Head, Link } from '@inertiajs/vue3';
+import { Plus, X } from 'lucide-vue-next';
+import { computed, onMounted, ref } from 'vue';
 import TournamentController from '@/actions/App/Http/Controllers/TournamentController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -9,9 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Form, Head, Link } from '@inertiajs/vue3';
-import { Plus, X } from 'lucide-vue-next';
-import { computed, onMounted, ref } from 'vue';
 
 type Team = App.Data.TeamData;
 type Tournament = App.Data.TournamentData;

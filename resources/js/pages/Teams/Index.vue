@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import { Head, Link, router } from '@inertiajs/vue3';
+import { Edit, Plus, Trash2 } from 'lucide-vue-next';
 import TeamController from '@/actions/App/Http/Controllers/TeamController';
 import Pagination from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { Edit, Plus, Trash2 } from 'lucide-vue-next';
 
 type Team = App.Data.TeamData;
 
