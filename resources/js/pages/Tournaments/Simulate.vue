@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import AllWeeks from '@/components/AllWeeks.vue';
+import LeagueTable from '@/components/LeagueTable.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -54,20 +56,7 @@ const totalWeeks = computed(() => {
 });
 
 const currentWeek = computed(() => {
-    const playedWeeks = props.matches
-        .filter((match) => match.isPlayed)
-        .map((match) => match.week);
-
-    if (playedWeeks.length === 0) {
-        return 1;
-    }
-
-    const maxPlayedWeek = Math.max(...playedWeeks);
-    const hasUnplayedMatches = props.matches.some(
-        (match) => match.week === maxPlayedWeek && !match.isPlayed,
-    );
-
-    return hasUnplayedMatches ? maxPlayedWeek : maxPlayedWeek + 1;
+    return props.tournament.currentWeek;
 });
 
 const showPredictions = computed(() => {
@@ -75,15 +64,12 @@ const showPredictions = computed(() => {
 });
 
 const fixtures = computed(() => {
-    return weeks.value.map((week) => ({
-        week,
-        matches: matchesByWeek.value[week].map((match) => ({
-            home: match.homeTeam?.name || 'Unknown',
-            away: match.awayTeam?.name || 'Unknown',
-            homeScore: match.homeScore,
-            awayScore: match.awayScore,
-        })),
-    }));
+    return weeks.value
+        .filter((week) => week <= currentWeek.value)
+        .map((week) => ({
+            week,
+            matches: matchesByWeek.value[week],
+        }));
 });
 
 const startDate = new Date('2025-01-15');
@@ -193,241 +179,13 @@ const playAllSimulation = () => {
             </div>
 
             <!-- League Table -->
-            <div
-                class="overflow-hidden rounded-lg border border-sidebar-border/70 dark:border-sidebar-border"
-            >
-                <div class="bg-muted/50 px-6 py-3">
-                    <h2 class="text-lg font-semibold">League Table</h2>
-                </div>
-                <div
-                    v-if="!showPredictions"
-                    class="border-b border-sidebar-border/70 bg-muted/30 px-6 py-3 dark:border-sidebar-border"
-                >
-                    <p class="text-sm text-muted-foreground">
-                        <span class="font-medium"
-                            >Predictions will be available in week 4.</span
-                        >
-                        Championship predictions will be shown after week 3 is
-                        completed.
-                    </p>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-muted/50">
-                            <tr>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                                >
-                                    Teams
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                                >
-                                    PTS
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                                >
-                                    P
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                                >
-                                    W
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                                >
-                                    D
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                                >
-                                    L
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                                >
-                                    GD
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                                >
-                                    Prediction %
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody
-                            class="divide-y divide-sidebar-border/70 dark:divide-sidebar-border"
-                        >
-                            <tr
-                                v-for="team in mockLeagueTable"
-                                :key="team.team"
-                                class="hover:bg-muted/50"
-                            >
-                                <td class="px-6 py-4 text-sm font-medium">
-                                    {{ team.team }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-center text-sm font-bold"
-                                >
-                                    {{ team.pts }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-center text-sm text-muted-foreground"
-                                >
-                                    {{ team.played }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-center text-sm text-muted-foreground"
-                                >
-                                    {{ team.wins }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-center text-sm text-muted-foreground"
-                                >
-                                    {{ team.draws }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-center text-sm text-muted-foreground"
-                                >
-                                    {{ team.losses }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-center text-sm"
-                                    :class="{
-                                        'text-green-600 dark:text-green-400':
-                                            team.goalDifference > 0,
-                                        'text-red-600 dark:text-red-400':
-                                            team.goalDifference < 0,
-                                        'text-muted-foreground':
-                                            team.goalDifference === 0,
-                                    }"
-                                >
-                                    {{ team.goalDifference > 0 ? '+' : ''
-                                    }}{{ team.goalDifference }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-center text-sm font-semibold"
-                                >
-                                    <span v-if="showPredictions"
-                                        >{{ team.prediction }}%</span
-                                    >
-                                    <span v-else class="text-muted-foreground"
-                                        >-</span
-                                    >
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <LeagueTable
+                :teams="mockLeagueTable"
+                :show-predictions="showPredictions"
+            />
 
             <!-- All Weeks Section -->
-            <div
-                class="overflow-hidden rounded-lg border border-sidebar-border/70 dark:border-sidebar-border"
-            >
-                <div class="bg-muted/50 px-6 py-3">
-                    <h2 class="text-lg font-semibold">All Weeks</h2>
-                </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <div
-                            v-for="fixture in fixtures"
-                            :key="fixture.week"
-                            class="group relative overflow-hidden rounded-lg border border-sidebar-border bg-card p-6 shadow-sm transition-all duration-300"
-                            :class="{
-                                'border-primary bg-muted/10 shadow-lg ring-2 shadow-primary/10 ring-primary/30':
-                                    fixture.week === currentWeek,
-                                'hover:border-sidebar-border hover:shadow-md':
-                                    fixture.week !== currentWeek,
-                            }"
-                        >
-                            <div
-                                v-if="fixture.week === currentWeek"
-                                class="pointer-events-none absolute inset-0 rounded-lg opacity-60"
-                                style="
-                                    background: radial-gradient(
-                                        ellipse 800px 600px at 0% 0%,
-                                        rgba(255, 255, 255, 0.2),
-                                        transparent 70%
-                                    );
-                                "
-                            />
-                            <div class="relative">
-                                <div
-                                    class="mb-5 flex items-center justify-between"
-                                >
-                                    <h3
-                                        class="text-lg font-bold"
-                                        :class="{
-                                            'text-primary':
-                                                fixture.week === currentWeek,
-                                            'text-foreground':
-                                                fixture.week !== currentWeek,
-                                        }"
-                                    >
-                                        Week {{ fixture.week }}
-                                    </h3>
-                                    <div
-                                        v-if="fixture.week === currentWeek"
-                                        class="flex size-2 rounded-full bg-primary"
-                                    />
-                                </div>
-                                <div class="space-y-2">
-                                    <div
-                                        v-for="(
-                                            match, index
-                                        ) in fixture.matches"
-                                        :key="index"
-                                        class="flex items-center justify-between rounded-lg border border-sidebar-border bg-muted/10 px-4 py-3 transition-colors hover:bg-muted/20"
-                                    >
-                                        <span
-                                            class="flex-1 text-right text-sm font-semibold text-foreground"
-                                        >
-                                            {{ match.home }}
-                                        </span>
-                                        <div
-                                            class="mx-4 flex items-center gap-2"
-                                        >
-                                            <span
-                                                v-if="match.homeScore !== null"
-                                                class="min-w-[2rem] text-center text-base font-bold text-foreground"
-                                            >
-                                                {{ match.homeScore }}
-                                            </span>
-                                            <span
-                                                v-else
-                                                class="min-w-[2rem] text-center text-muted-foreground"
-                                                >-</span
-                                            >
-                                            <span class="text-muted-foreground"
-                                                >-</span
-                                            >
-                                            <span
-                                                v-if="match.awayScore !== null"
-                                                class="min-w-[2rem] text-center text-base font-bold text-foreground"
-                                            >
-                                                {{ match.awayScore }}
-                                            </span>
-                                            <span
-                                                v-else
-                                                class="min-w-[2rem] text-center text-muted-foreground"
-                                                >-</span
-                                            >
-                                        </div>
-                                        <span
-                                            class="flex-1 text-left text-sm font-semibold text-foreground"
-                                        >
-                                            {{ match.away }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <AllWeeks :fixtures="fixtures" :current-week="currentWeek" />
         </div>
 
         <!-- Action Dock -->
