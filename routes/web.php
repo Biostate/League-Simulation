@@ -19,6 +19,7 @@ Route::get('dashboard', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('teams', TeamController::class);
     Route::resource('tournaments', TournamentController::class)->except(['show']);
+    Route::get('tournaments/{tournament}/simulate', [TournamentController::class, 'simulate'])->name('tournaments.simulate');
 });
 
 require __DIR__.'/settings.php';

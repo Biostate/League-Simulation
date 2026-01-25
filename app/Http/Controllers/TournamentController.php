@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\MatchData;
 use App\Data\TeamData;
 use App\Data\TeamTournamentData;
 use App\Data\TournamentData;
@@ -10,6 +11,7 @@ use App\Http\Requests\TournamentStoreRequest;
 use App\Http\Requests\TournamentUpdateRequest;
 use App\Models\Team;
 use App\Models\Tournament;
+use App\Services\MatchGenerationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -74,6 +76,11 @@ class TournamentController extends Controller
             });
 
             $tournament->teams()->sync($teamsData);
+
+            if ($tournament->teams()->count() >= 2) {
+                $matchGenerationService = new MatchGenerationService;
+                $matchGenerationService->generateMatches($tournament);
+            }
         }
 
         return redirect()->route('tournaments.index')
@@ -122,6 +129,13 @@ class TournamentController extends Controller
             });
 
             $tournament->teams()->sync($teamsData);
+
+            $tournament->matches()->delete();
+
+            if ($tournament->teams()->count() >= 2) {
+                $matchGenerationService = new MatchGenerationService;
+                $matchGenerationService->generateMatches($tournament);
+            }
         }
 
         return redirect()->route('tournaments.index')
@@ -136,5 +150,23 @@ class TournamentController extends Controller
 
         return redirect()->route('tournaments.index')
             ->with('success', 'Tournament deleted successfully.');
+    }
+
+    public function simulate(Tournament $tournament): Response
+    {
+        $this->authorize('view', $tournament);
+
+        $tournament->load([
+            'teams.media',
+            'matches.homeTeam.media',
+            'matches.awayTeam.media',
+        ]);
+
+        $matchesData = MatchData::collect($tournament->matches);
+
+        return Inertia::render('Tournaments/Simulate', [
+            'tournament' => TournamentData::from($tournament)->toArray(),
+            'matches' => $matchesData->toArray(),
+        ]);
     }
 }

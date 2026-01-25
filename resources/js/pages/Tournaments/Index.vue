@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Edit, Plus, Trash2 } from 'lucide-vue-next';
+import { Edit, Play, Plus, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 import TournamentController from '@/actions/App/Http/Controllers/TournamentController';
 import Pagination from '@/components/Pagination.vue';
@@ -162,6 +162,17 @@ const getTournamentName = () => {
                                 <div
                                     class="flex items-center justify-end gap-2"
                                 >
+                                    <Link
+                                        :href="
+                                            TournamentController.simulate.url(
+                                                tournament.id,
+                                            )
+                                        "
+                                    >
+                                        <Button variant="ghost" size="icon-sm">
+                                            <Play />
+                                        </Button>
+                                    </Link>
                                     <Link
                                         :href="
                                             TournamentController.edit.url(

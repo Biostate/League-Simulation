@@ -1,4 +1,16 @@
 declare namespace App.Data {
+    export type MatchData = {
+        id: number;
+        tournamentId: number;
+        homeTeamId: number;
+        awayTeamId: number;
+        homeScore: number | null;
+        awayScore: number | null;
+        week: number;
+        isPlayed: boolean;
+        homeTeam: App.Data.TeamData | null;
+        awayTeam: App.Data.TeamData | null;
+    };
     export type TeamData = {
         id: number;
         name: string;

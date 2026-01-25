@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -30,6 +31,16 @@ class Team extends Model implements HasMedia
     public function isUsedInTournaments(): bool
     {
         return $this->tournaments()->exists();
+    }
+
+    public function homeMatches(): HasMany
+    {
+        return $this->hasMany(Game::class, 'home_team_id');
+    }
+
+    public function awayMatches(): HasMany
+    {
+        return $this->hasMany(Game::class, 'away_team_id');
     }
 
     public function registerMediaConversions(?Media $media = null): void

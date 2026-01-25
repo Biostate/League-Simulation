@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Tournament extends Model
 {
@@ -33,5 +34,10 @@ class Tournament extends Model
         return $this->belongsToMany(Team::class)
             ->withPivot('strength')
             ->withTimestamps();
+    }
+
+    public function matches(): HasMany
+    {
+        return $this->hasMany(Game::class);
     }
 }
