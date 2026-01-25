@@ -17,6 +17,7 @@ type Props = {
     tournament: Tournament;
     matches: Match[];
     standings: Standing[];
+    predictions?: Record<number, number>;
 };
 
 const props = defineProps<Props>();
@@ -157,7 +158,7 @@ const leagueTableData = computed(() => {
         draws: standing.drawn,
         losses: standing.lost,
         goalDifference: standing.goalDifference,
-        prediction: 0, // TODO: Calculate prediction
+        prediction: props.predictions?.[standing.teamId] ?? 0,
     }));
 });
 </script>

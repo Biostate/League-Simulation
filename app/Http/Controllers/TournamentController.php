@@ -13,6 +13,7 @@ use App\Http\Requests\TournamentUpdateRequest;
 use App\Models\Team;
 use App\Models\Tournament;
 use App\Services\MatchGenerationService;
+use App\Services\PredictionService;
 use App\Services\StandingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -194,10 +195,17 @@ class TournamentController extends Controller
 
         $standingsData = StandingData::collect($standings);
 
+        $predictions = [];
+        $predictionService = new PredictionService;
+        if ($predictionService->canPredict($tournament)) {
+            $predictions = $predictionService->predict($tournament);
+        }
+
         return Inertia::render('Tournaments/Simulate', [
             'tournament' => TournamentData::from($tournament)->toArray(),
             'matches' => $matchesData->toArray(),
             'standings' => $standingsData->toArray(),
+            'predictions' => $predictions,
         ]);
     }
 }
