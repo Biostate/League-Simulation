@@ -2,4 +2,3 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 php artisan typescript:transform
-npm run format

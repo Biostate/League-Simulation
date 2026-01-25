@@ -1,1 +1,0 @@
-- When creating or updating a Data class, run "herd php artisan typescript:transform" to generate typescript version in frontend.
