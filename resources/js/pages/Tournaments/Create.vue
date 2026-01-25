@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { Form, Head, Link } from '@inertiajs/vue3';
-import { Plus, Shuffle, X } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
 import TournamentController from '@/actions/App/Http/Controllers/TournamentController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -12,6 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
+import { Form, Head, Link } from '@inertiajs/vue3';
+import { Plus, Shuffle, X } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
 type Team = App.Data.TeamData;
 
@@ -65,7 +65,11 @@ const updateStrength = (teamId: number, strength: string | number) => {
     }
 };
 
-const handleTeamCreated = (team: { id: number; name: string; logoUrl?: string | null }) => {
+const handleTeamCreated = (team: {
+    id: number;
+    name: string;
+    logoUrl?: string | null;
+}) => {
     teams.value.push({
         id: team.id,
         name: team.name,
@@ -123,7 +127,10 @@ const randomizeStrengths = () => {
 
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
-                        <Label class="text-sm font-medium uppercase tracking-wider text-muted-foreground">Teams</Label>
+                        <Label
+                            class="text-sm font-medium tracking-wider text-muted-foreground uppercase"
+                            >Teams</Label
+                        >
                         <Button
                             type="button"
                             variant="outline"
@@ -146,35 +153,48 @@ const randomizeStrengths = () => {
                                 <Avatar class="size-16">
                                     <AvatarImage
                                         v-if="getTeam(selectedTeam.id)?.logoUrl"
-                                        :src="getTeam(selectedTeam.id)!.logoUrl!"
-                                        :alt="getTeam(selectedTeam.id)?.name || ''"
+                                        :src="
+                                            getTeam(selectedTeam.id)!.logoUrl!
+                                        "
+                                        :alt="
+                                            getTeam(selectedTeam.id)?.name || ''
+                                        "
                                     />
                                     <AvatarFallback class="text-lg">
-                                        {{ getTeam(selectedTeam.id)?.name?.charAt(0) }}
+                                        {{
+                                            getTeam(
+                                                selectedTeam.id,
+                                            )?.name?.charAt(0)
+                                        }}
                                     </AvatarFallback>
                                 </Avatar>
                                 <Button
                                     type="button"
                                     variant="ghost"
                                     size="icon"
-                                    class="absolute -right-1 -top-1 size-6 rounded-full bg-background p-0 shadow-sm hover:bg-destructive hover:text-destructive-foreground"
+                                    class="absolute -top-1 -right-1 size-6 rounded-full bg-background p-0 shadow-sm hover:bg-destructive hover:text-destructive-foreground"
                                     @click="removeTeam(selectedTeam.id)"
                                 >
                                     <X class="size-3" />
                                 </Button>
                             </div>
-                            <span class="text-sm font-semibold">{{ getTeam(selectedTeam.id)?.name }}</span>
+                            <span class="text-sm font-semibold">{{
+                                getTeam(selectedTeam.id)?.name
+                            }}</span>
                         </div>
 
                         <!-- Available Teams (Grayscale with + overlay) -->
                         <div
                             v-for="team in availableTeams"
                             :key="team.id"
-                            class="relative flex shrink-0 flex-col items-center gap-2 cursor-pointer"
+                            class="relative flex shrink-0 cursor-pointer flex-col items-center gap-2"
                             @click="addTeam(team.id)"
                         >
                             <div class="relative">
-                                <Avatar class="size-16" style="filter: grayscale(100%)">
+                                <Avatar
+                                    class="size-16"
+                                    style="filter: grayscale(100%)"
+                                >
                                     <AvatarImage
                                         v-if="team.logoUrl"
                                         :src="team.logoUrl"
@@ -184,11 +204,15 @@ const randomizeStrengths = () => {
                                         {{ team.name.charAt(0) }}
                                     </AvatarFallback>
                                 </Avatar>
-                                <div class="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full bg-background shadow-sm">
+                                <div
+                                    class="absolute -right-1 -bottom-1 flex size-6 items-center justify-center rounded-full bg-background shadow-sm"
+                                >
                                     <Plus class="size-4 text-foreground" />
                                 </div>
                             </div>
-                            <span class="text-sm font-semibold">{{ team.name }}</span>
+                            <span class="text-sm font-semibold">{{
+                                team.name
+                            }}</span>
                         </div>
 
                         <!-- Add Button -->
@@ -197,14 +221,18 @@ const randomizeStrengths = () => {
                             class="flex shrink-0 flex-col items-center gap-2 transition-colors hover:opacity-80"
                             @click="showModal = true"
                         >
-                            <div class="flex size-16 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/40 bg-transparent">
+                            <div
+                                class="flex size-16 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/40 bg-transparent"
+                            >
                                 <Plus class="size-8 text-muted-foreground" />
                             </div>
                             <span class="text-sm font-semibold">Add</span>
                         </button>
                     </div>
 
-                    <div class="space-y-3 rounded-lg border-2 border-primary/20 bg-muted/30 p-4">
+                    <div
+                        class="space-y-3 rounded-lg border-2 border-primary/20 bg-muted/30 p-4"
+                    >
                         <div class="flex items-center justify-between">
                             <Label class="text-base font-semibold"
                                 >Team Strength Points</Label
@@ -229,8 +257,12 @@ const randomizeStrengths = () => {
                                 <Avatar class="h-10 w-10 shrink-0">
                                     <AvatarImage
                                         v-if="getTeam(selectedTeam.id)?.logoUrl"
-                                        :src="getTeam(selectedTeam.id)!.logoUrl!"
-                                        :alt="getTeam(selectedTeam.id)?.name || ''"
+                                        :src="
+                                            getTeam(selectedTeam.id)!.logoUrl!
+                                        "
+                                        :alt="
+                                            getTeam(selectedTeam.id)?.name || ''
+                                        "
                                     />
                                     <AvatarFallback>
                                         {{

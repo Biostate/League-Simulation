@@ -89,8 +89,10 @@ const canEditMatch = (match: App.Data.MatchData) => {
                     :key="index"
                     class="flex items-center justify-between rounded-lg border border-sidebar-border px-4 py-3 transition-colors"
                     :class="{
-                        'cursor-pointer bg-muted/10 hover:bg-muted/20': canEditMatch(match),
-                        'cursor-not-allowed bg-muted/5 opacity-60': !canEditMatch(match),
+                        'cursor-pointer bg-muted/10 hover:bg-muted/20':
+                            canEditMatch(match),
+                        'cursor-not-allowed bg-muted/5 opacity-60':
+                            !canEditMatch(match),
                     }"
                     @click="handleMatchClick(match)"
                 >

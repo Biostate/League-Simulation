@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { router, usePage } from '@inertiajs/vue3';
-import { ref } from 'vue';
 import TeamController from '@/actions/App/Http/Controllers/TeamController';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -14,6 +12,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { router, usePage } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 const props = defineProps<{
     open: boolean;

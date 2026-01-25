@@ -128,7 +128,9 @@ const playNextWeek = () => {
         {
             preserveScroll: true,
             onSuccess: () => {
-                router.reload({ only: ['tournament', 'matches', 'standings', 'predictions'] });
+                router.reload({
+                    only: ['tournament', 'matches', 'standings', 'predictions'],
+                });
             },
             onFinish: () => {
                 processingNextWeek.value = false;
@@ -150,7 +152,9 @@ const playAllSimulation = () => {
         {
             preserveScroll: true,
             onSuccess: () => {
-                router.reload({ only: ['tournament', 'matches', 'standings', 'predictions'] });
+                router.reload({
+                    only: ['tournament', 'matches', 'standings', 'predictions'],
+                });
             },
             onFinish: () => {
                 processingAllWeeks.value = false;
@@ -194,7 +198,9 @@ const handleRollbackWeek = (week: number) => {
         {
             preserveScroll: true,
             onSuccess: () => {
-                router.reload({ only: ['tournament', 'matches', 'standings', 'predictions'] });
+                router.reload({
+                    only: ['tournament', 'matches', 'standings', 'predictions'],
+                });
             },
             onFinish: () => {
                 processingRollback.value = false;
@@ -265,14 +271,22 @@ const handleRollbackWeek = (week: number) => {
                 <Button
                     variant="outline"
                     @click="playAllSimulation"
-                    :disabled="!canPlay || processingAllWeeks || processingNextWeek"
+                    :disabled="
+                        !canPlay || processingAllWeeks || processingNextWeek
+                    "
                 >
                     <PlayCircle class="mr-2 size-4" />
-                    {{ processingAllWeeks ? 'Playing...' : 'Play All Simulation' }}
+                    {{
+                        processingAllWeeks
+                            ? 'Playing...'
+                            : 'Play All Simulation'
+                    }}
                 </Button>
                 <Button
                     @click="playNextWeek"
-                    :disabled="!canPlay || processingNextWeek || processingAllWeeks"
+                    :disabled="
+                        !canPlay || processingNextWeek || processingAllWeeks
+                    "
                 >
                     <Play class="mr-2 size-4" />
                     {{ processingNextWeek ? 'Playing...' : 'Play Next Week' }}

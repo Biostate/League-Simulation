@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { router, usePage } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +11,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { router, usePage } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
 
 type Match = App.Data.MatchData;
 
@@ -24,7 +24,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     'update:open': [value: boolean];
-    'updated': [];
+    updated: [];
 }>();
 
 const page = usePage();
@@ -95,7 +95,9 @@ const updateMatch = () => {
             </DialogHeader>
 
             <div v-if="props.match" class="space-y-4 py-4">
-                <div class="flex items-center justify-between rounded-lg border p-4">
+                <div
+                    class="flex items-center justify-between rounded-lg border p-4"
+                >
                     <span class="font-semibold">
                         {{ props.match.homeTeam?.name || 'Unknown' }}
                     </span>

@@ -94,9 +94,7 @@ defineProps<Props>();
                         <td class="px-6 py-4 text-sm font-medium">
                             {{ team.team }}
                         </td>
-                        <td
-                            class="px-6 py-4 text-center text-sm font-bold"
-                        >
+                        <td class="px-6 py-4 text-center text-sm font-bold">
                             {{ team.pts }}
                         </td>
                         <td
@@ -133,15 +131,11 @@ defineProps<Props>();
                             {{ team.goalDifference > 0 ? '+' : ''
                             }}{{ team.goalDifference }}
                         </td>
-                        <td
-                            class="px-6 py-4 text-center text-sm font-semibold"
-                        >
+                        <td class="px-6 py-4 text-center text-sm font-semibold">
                             <span v-if="showPredictions"
                                 >{{ team.prediction }}%</span
                             >
-                            <span v-else class="text-muted-foreground"
-                                >-</span
-                            >
+                            <span v-else class="text-muted-foreground">-</span>
                         </td>
                     </tr>
                 </tbody>
