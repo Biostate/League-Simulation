@@ -76,17 +76,6 @@ const fixtures = computed(() => {
         }));
 });
 
-const startDate = new Date('2025-01-15');
-const endDate = new Date('2025-02-28');
-
-const formatDate = (date: Date): string => {
-    return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-    });
-};
-
 const getStatusBadgeVariant = (status: App.Enums.TournamentStatus) => {
     switch (status) {
         case 'created':
@@ -228,10 +217,6 @@ const handleRollbackWeek = (week: number) => {
                         </Badge>
                         <span class="text-sm text-muted-foreground">
                             Week {{ currentWeek }}/{{ totalWeeks }}
-                        </span>
-                        <span class="text-sm text-muted-foreground">
-                            {{ formatDate(startDate) }} -
-                            {{ formatDate(endDate) }}
                         </span>
                     </div>
                 </div>
