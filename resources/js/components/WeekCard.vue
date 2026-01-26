@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
 
 type Props = {
@@ -28,7 +29,9 @@ const handleRollback = () => {
 };
 
 // Can rollback only to weeks before the current week (not the current week itself)
-const canRollback = props.week < props.currentWeek && props.week > 0;
+const canRollback = computed(() => {
+    return props.week < props.currentWeek && props.week > 0;
+});
 
 // Can edit matches only in weeks <= current week
 const canEditMatch = (match: App.Data.MatchData) => {

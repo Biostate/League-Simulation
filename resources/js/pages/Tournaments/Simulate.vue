@@ -68,9 +68,8 @@ const showPredictions = computed(() => {
 });
 
 const fixtures = computed(() => {
-    const maxWeekToShow = Math.min(currentWeek.value + 1, totalWeeks.value);
     return weeks.value
-        .filter((week) => week <= maxWeekToShow)
+        .filter((week) => week <= currentWeek.value)
         .map((week) => ({
             week,
             matches: matchesByWeek.value[week],
