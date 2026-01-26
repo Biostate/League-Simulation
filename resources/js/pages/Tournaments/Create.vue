@@ -55,19 +55,8 @@ const updateStrength = (teamId: number, strength: string | number) => {
     }
 };
 
-const handleTeamCreated = (team: {
-    id: number;
-    name: string;
-    logoUrl?: string | null;
-}) => {
-    teams.value.push({
-        id: team.id,
-        name: team.name,
-        createdAt: null,
-        updatedAt: null,
-        logoUrl: team.logoUrl || null,
-    });
-    addTeam(team.id);
+const handleTeamCreated = (newTeams: Team[]) => {
+    teams.value = [...newTeams];
 };
 
 const randomizeStrengths = () => {

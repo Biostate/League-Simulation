@@ -22,7 +22,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     'update:open': [value: boolean];
     'team-created': [
-        team: { id: number; name: string; logoUrl?: string | null },
+        newTeams: Team[],
     ];
 }>();
 
@@ -49,11 +49,11 @@ const createTeam = () => {
         },
         {
             preserveScroll: true,
-            only: [],
+            only: ['teams'],
             onSuccess: (page) => {
-                const team = (page.props as any).team;
-                if (team) {
-                    emit('team-created', team);
+                const newTeams = (page.props as any).teams;
+                if (newTeams) {
+                    emit('team-created', newTeams);
                 }
                 close();
             },
