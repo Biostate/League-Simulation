@@ -5,16 +5,16 @@ namespace App\Http\Controllers;
 use App\Data\MatchData;
 use App\Data\StandingData;
 use App\Data\TeamData;
-use App\Data\TeamTournamentData;
+use App\Data\Tournament\StoreTournamentData;
+use App\Data\Tournament\UpdateTournamentData;
 use App\Data\TournamentData;
 use App\Enums\TournamentStatus;
 use App\Http\Requests\TournamentStoreRequest;
 use App\Http\Requests\TournamentUpdateRequest;
 use App\Models\Team;
 use App\Models\Tournament;
-use App\Services\MatchGenerationService;
 use App\Services\PredictionService;
-use App\Services\StandingService;
+use App\Services\TournamentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -23,8 +23,7 @@ use Inertia\Response;
 class TournamentController extends Controller
 {
     public function __construct(
-        private StandingService $standingService,
-        private MatchGenerationService $matchGenerationService,
+        private TournamentService $tournamentService,
         private PredictionService $predictionService
     ) {}
 
@@ -72,31 +71,13 @@ class TournamentController extends Controller
         $this->authorize('create', Tournament::class);
 
         $validated = $request->validated();
-
-        $teamCount = isset($validated['teams']) && is_array($validated['teams']) ? count($validated['teams']) : 0;
-        $totalWeeks = MatchGenerationService::calculateTotalWeeks($teamCount);
-
-        $tournament = Tournament::create([
+        $data = StoreTournamentData::from([
             'name' => $validated['name'],
-            'status' => TournamentStatus::CREATED,
-            'user_id' => Auth::id(),
-            'current_week' => 0,
-            'total_weeks' => $totalWeeks,
+            'userId' => Auth::id(),
+            'teams' => $validated['teams'] ?? [],
         ]);
 
-        if (isset($validated['teams']) && is_array($validated['teams'])) {
-            $teamsData = collect($validated['teams'])->mapWithKeys(function ($team) {
-                return [$team['id'] => ['strength' => $team['strength']]];
-            });
-
-            $tournament->teams()->sync($teamsData);
-
-            $this->standingService->createStandings($tournament);
-
-            if ($tournament->teams()->count() >= 2) {
-                $this->matchGenerationService->generateMatches($tournament);
-            }
-        }
+        $this->tournamentService->create($data);
 
         return redirect()->route('tournaments.index')
             ->with('success', 'Tournament created successfully.');
@@ -112,8 +93,6 @@ class TournamentController extends Controller
             ->with('media')
             ->latest()
             ->get();
-
-        $selectedTeams = TeamTournamentData::collect($tournament->teams);
 
         $allTeamsData = TeamData::collect($allTeams);
 
@@ -133,33 +112,12 @@ class TournamentController extends Controller
         }
 
         $validated = $request->validated();
-
-        $tournament->update([
+        $data = UpdateTournamentData::from([
             'name' => $validated['name'],
+            'teams' => $validated['teams'] ?? [],
         ]);
 
-        if (isset($validated['teams']) && is_array($validated['teams'])) {
-            $teamCount = count($validated['teams']);
-            $totalWeeks = MatchGenerationService::calculateTotalWeeks($teamCount);
-
-            $tournament->update([
-                'total_weeks' => $totalWeeks,
-            ]);
-
-            $teamsData = collect($validated['teams'])->mapWithKeys(function ($team) {
-                return [$team['id'] => ['strength' => $team['strength']]];
-            });
-
-            $tournament->teams()->sync($teamsData);
-
-            $tournament->matches()->delete();
-
-            $this->standingService->createStandings($tournament);
-
-            if ($tournament->teams()->count() >= 2) {
-                $this->matchGenerationService->generateMatches($tournament);
-            }
-        }
+        $this->tournamentService->update($data, $tournament);
 
         return redirect()->route('tournaments.index')
             ->with('success', 'Tournament updated successfully.');
