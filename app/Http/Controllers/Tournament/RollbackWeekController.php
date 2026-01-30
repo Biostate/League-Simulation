@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tournament;
 
 use App\Enums\TournamentStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Tournament\RollbackWeekRequest;
 use App\Models\Game;
 use App\Models\Tournament;
 use App\Services\StandingService;
@@ -12,16 +13,12 @@ use Illuminate\Support\Facades\DB;
 
 class RollbackWeekController extends Controller
 {
-    public function __invoke(Tournament $tournament, int $week): RedirectResponse
+    public function __invoke(RollbackWeekRequest $request, StandingService $standingService, Tournament $tournament, int $week): RedirectResponse
     {
         $this->authorize('update', $tournament);
 
-        if ($week < 0 || $week > $tournament->current_week) {
-            return back()->with('error', 'Invalid rollback week.');
-        }
-
         try {
-            DB::transaction(function () use ($tournament, $week) {
+            DB::transaction(function () use ($standingService, $tournament, $week) {
                 // Reset all matches in later weeks
                 Game::where('tournament_id', $tournament->id)
                     ->where('week', '>', $week)
@@ -32,7 +29,6 @@ class RollbackWeekController extends Controller
                     ]);
 
                 // Recalculate all standings
-                $standingService = new StandingService;
                 $standingService->recalculateAllStandings($tournament);
 
                 // Update tournament current week and status

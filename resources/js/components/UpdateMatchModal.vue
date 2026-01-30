@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { router, usePage } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,6 @@ const emit = defineEmits<{
     updated: [];
 }>();
 
-const page = usePage();
 const homeScore = ref<number | null>(null);
 const awayScore = ref<number | null>(null);
 const errors = ref<Record<string, string>>({});

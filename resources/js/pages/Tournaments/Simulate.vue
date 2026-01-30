@@ -69,7 +69,7 @@ const showPredictions = computed(() => {
 
 const fixtures = computed(() => {
     return weeks.value
-        .filter((week) => week <=  currentWeek.value + 1)
+        .filter((week) => week <= currentWeek.value + 1)
         .map((week) => ({
             week,
             matches: matchesByWeek.value[week],

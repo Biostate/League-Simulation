@@ -10,7 +10,7 @@ type Props = {
     strength: string | number;
 };
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
     'update:strength': [value: string | number];
