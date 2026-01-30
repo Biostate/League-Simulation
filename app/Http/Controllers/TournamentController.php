@@ -22,6 +22,12 @@ use Inertia\Response;
 
 class TournamentController extends Controller
 {
+    public function __construct(
+        private StandingService $standingService,
+        private MatchGenerationService $matchGenerationService,
+        private PredictionService $predictionService
+    ) {}
+
     public function index(): Response
     {
         $this->authorize('viewAny', Tournament::class);
@@ -85,12 +91,10 @@ class TournamentController extends Controller
 
             $tournament->teams()->sync($teamsData);
 
-            $standingService = new StandingService;
-            $standingService->createStandings($tournament);
+            $this->standingService->createStandings($tournament);
 
             if ($tournament->teams()->count() >= 2) {
-                $matchGenerationService = new MatchGenerationService;
-                $matchGenerationService->generateMatches($tournament);
+                $this->matchGenerationService->generateMatches($tournament);
             }
         }
 
@@ -150,12 +154,10 @@ class TournamentController extends Controller
 
             $tournament->matches()->delete();
 
-            $standingService = new StandingService;
-            $standingService->createStandings($tournament);
+            $this->standingService->createStandings($tournament);
 
             if ($tournament->teams()->count() >= 2) {
-                $matchGenerationService = new MatchGenerationService;
-                $matchGenerationService->generateMatches($tournament);
+                $this->matchGenerationService->generateMatches($tournament);
             }
         }
 
@@ -196,9 +198,8 @@ class TournamentController extends Controller
         $standingsData = StandingData::collect($standings);
 
         $predictions = [];
-        $predictionService = new PredictionService;
-        if ($predictionService->canPredict($tournament)) {
-            $predictions = $predictionService->predict($tournament);
+        if ($this->predictionService->canPredict($tournament)) {
+            $predictions = $this->predictionService->predict($tournament);
         }
 
         return Inertia::render('Tournaments/Simulate', [

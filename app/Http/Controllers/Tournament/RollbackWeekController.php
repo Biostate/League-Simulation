@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class RollbackWeekController extends Controller
 {
-    public function __invoke(Tournament $tournament, int $week): RedirectResponse
+    public function __invoke(StandingService $standingService, Tournament $tournament, int $week): RedirectResponse
     {
         $this->authorize('update', $tournament);
 
@@ -21,7 +21,7 @@ class RollbackWeekController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($tournament, $week) {
+            DB::transaction(function () use ($standingService, $tournament, $week) {
                 // Reset all matches in later weeks
                 Game::where('tournament_id', $tournament->id)
                     ->where('week', '>', $week)
@@ -32,7 +32,6 @@ class RollbackWeekController extends Controller
                     ]);
 
                 // Recalculate all standings
-                $standingService = new StandingService;
                 $standingService->recalculateAllStandings($tournament);
 
                 // Update tournament current week and status
