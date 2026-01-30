@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tournament;
 
 use App\Enums\TournamentStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Tournament\RollbackWeekRequest;
 use App\Models\Game;
 use App\Models\Tournament;
 use App\Services\StandingService;
@@ -12,13 +13,9 @@ use Illuminate\Support\Facades\DB;
 
 class RollbackWeekController extends Controller
 {
-    public function __invoke(StandingService $standingService, Tournament $tournament, int $week): RedirectResponse
+    public function __invoke(RollbackWeekRequest $request, StandingService $standingService, Tournament $tournament, int $week): RedirectResponse
     {
         $this->authorize('update', $tournament);
-
-        if ($week < 0 || $week > $tournament->current_week) {
-            return back()->with('error', 'Invalid rollback week.');
-        }
 
         try {
             DB::transaction(function () use ($standingService, $tournament, $week) {
