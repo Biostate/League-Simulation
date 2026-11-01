@@ -1,7 +1,5 @@
 <?php
 
-use App\Enums\TournamentStatus;
-use App\Models\Game;
 use App\Models\Standing;
 use App\Models\Team;
 use App\Models\Tournament;
@@ -158,7 +156,7 @@ test('team with highest points and strength has highest prediction', function ()
 
     expect($predictions[$team1->id])->toBeGreaterThan(0);
     expect($predictions[$team1->id])->toBeGreaterThanOrEqual($predictions[$team2->id]);
-    
+
     if ($predictions[$team2->id] > 0) {
         expect($predictions[$team2->id])->toBeGreaterThanOrEqual($predictions[$team3->id]);
     }

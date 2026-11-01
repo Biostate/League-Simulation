@@ -21,9 +21,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     'update:open': [value: boolean];
-    'team-created': [
-        newTeams: Team[],
-    ];
+    'team-created': [newTeams: Team[]];
 }>();
 
 const page = usePage();

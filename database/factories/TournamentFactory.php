@@ -18,7 +18,7 @@ class TournamentFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->words(3, true) . ' Tournament',
+            'name' => fake()->words(3, true).' Tournament',
             'status' => TournamentStatus::CREATED->value,
         ];
     }

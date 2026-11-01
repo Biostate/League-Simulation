@@ -244,7 +244,7 @@ test('cannot rollback to future weeks', function () {
     );
 
     $response->assertRedirect();
-    $response->assertSessionHas('error');
+    $response->assertSessionHasErrors('week');
 });
 
 test('cannot rollback to negative week', function () {
@@ -267,7 +267,7 @@ test('cannot rollback to negative week', function () {
     );
 
     $response->assertRedirect();
-    $response->assertSessionHas('error');
+    $response->assertSessionHasErrors('week');
 });
 
 test('unauthorized users cannot rollback', function () {

@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\DB;
 
 class PlayNextWeekController extends Controller
 {
+    public function __construct(
+        private SimulationService $simulationService
+    ) {}
+
     public function __invoke(Tournament $tournament): RedirectResponse
     {
         $this->authorize('update', $tournament);
@@ -28,8 +32,7 @@ class PlayNextWeekController extends Controller
                 $tournament->status = TournamentStatus::SIMULATING;
                 $tournament->save();
 
-                $simulationService = new SimulationService;
-                $simulationService->playNextWeek($tournament);
+                $this->simulationService->playNextWeek($tournament);
             });
 
             return back()->with('success', 'Week played successfully.');

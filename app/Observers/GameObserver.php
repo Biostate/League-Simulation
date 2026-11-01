@@ -7,6 +7,10 @@ use App\Services\StandingService;
 
 class GameObserver
 {
+    public function __construct(
+        private StandingService $standingService
+    ) {}
+
     /**
      * Handle the Game "created" event.
      */
@@ -20,8 +24,7 @@ class GameObserver
      */
     public function updated(Game $game): void
     {
-        $standingService = new StandingService;
-        $standingService->updateStandings($game);
+        $this->standingService->updateStandings($game);
     }
 
     /**

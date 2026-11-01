@@ -2,3 +2,4 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 php artisan typescript:transform
+npx prettier --write resources/types/generated.d.ts

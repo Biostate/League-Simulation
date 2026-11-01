@@ -48,6 +48,21 @@ declare namespace App.Data {
         teams: Array<App.Data.TeamTournamentData> | null;
     };
 }
+declare namespace App.Data.Tournament {
+    export type StoreTournamentData = {
+        name: string;
+        userId: number;
+        teams: Array<App.Data.Tournament.TeamSelectionData>;
+    };
+    export type TeamSelectionData = {
+        id: number;
+        strength: number;
+    };
+    export type UpdateTournamentData = {
+        name: string;
+        teams: Array<App.Data.Tournament.TeamSelectionData>;
+    };
+}
 declare namespace App.Enums {
     export type TournamentStatus =
         | 'created'

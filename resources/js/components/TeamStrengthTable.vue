@@ -23,7 +23,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
     'update-strength': [teamId: number, strength: string | number];
-    'randomize': [];
+    randomize: [];
 }>();
 
 const getTeam = (teamId: number) => {
@@ -63,10 +63,7 @@ const handleStrengthUpdate = (teamId: number, strength: string | number) => {
                 "
             />
         </div>
-        <div
-            v-else
-            class="py-8 text-center text-sm text-muted-foreground"
-        >
+        <div v-else class="py-8 text-center text-sm text-muted-foreground">
             Select teams above to set their strength points.
         </div>
     </div>
